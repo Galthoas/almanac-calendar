@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Almanac &amp; Pagan Calendar</title>
+<style>
+  :root {
+    --bg: #1d1a16; --panel: #2a251f; --ink: #efe6d2; --muted: #a89c86;
+    --accent: #c8a45a; --sabbat: #7fb069; --full: #f2d16b; --line: #3d352b;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Georgia, "Times New Roman", serif; background: var(--bg); color: var(--ink); }
+  header { padding: 16px 20px; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+  h1 { margin: 0; font-size: 1.4rem; color: var(--accent); }
+  main { display: grid; grid-template-columns: 300px 1fr; gap: 20px; padding: 20px; }
+  @media (max-width: 800px) { main { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+  .panel h2 { font-size: 1rem; margin: 0 0 10px; color: var(--accent); }
+  label { display: block; font-size: .85rem; color: var(--muted); margin: 8px 0 3px; }
+  input, select, button { width: 100%; padding: 7px 9px; border-radius: 5px; border: 1px solid var(--line); background: #171410; color: var(--ink); font: inherit; }
+  button { background: var(--accent); color: #1d1a16; border: none; cursor: pointer; margin-top: 10px; font-weight: bold; }
+  button.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+  .small { font-size: .8rem; color: var(--muted); line-height: 1.4; }
+  .calhead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .dow { text-align: center; font-size: .75rem; color: var(--muted); padding: 4px 0; }
+  .day { min-height: 74px; background: #221e19; border: 1px solid var(--line); border-radius: 5px; padding: 4px; font-size: .75rem; overflow: hidden; }
+  .day.blank { background: transparent; border-color: transparent; }
+  .day.today { border-color: var(--accent); }
+  .num { font-size: .9rem; color: var(--ink); }
+  .moon { font-size: 1.1rem; }
+  .tag { display: block; color: var(--sabbat); font-size: .68rem; line-height: 1.2; margin-top: 2px; }
+  .full .moon { color: var(--full); }
+  .weather { font-size: .68rem; color: var(--muted); }
+  .list { list-style: none; padding: 0; margin: 0; font-size: .9rem; }
+  .list li { padding: 6px 0; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 8px; }
+  .list li span.d { color: var(--muted); white-space: nowrap; }
+  .status { font-size: .8rem; color: var(--muted); margin-top: 8px; min-height: 1em; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Almanac &amp; Pagan Calendar</h1>
+  <div class="small" id="updated">Not yet updated for a region.</div>
+</header>
+
+<main>
+  <aside>
+    <div class="panel">
+      <h2>Region</h2>
+      <label for="regionName">Name</label>
+      <input id="regionName" placeholder="e.g. Central Texas">
+      <div class="row">
+        <div><label for="lat">Latitude</label><input id="lat" type="number" step="0.0001" placeholder="30.2672"></div>
+        <div><label for="lon">Longitude</label><input id="lon" type="number" step="0.0001" placeholder="-97.7431"></div>
+      </div>
+      <label for="tz">Time zone</label>
+      <input id="tz" placeholder="America/Chicago">
+      <button id="saveRegion">Save region &amp; update data</button>
+      <button id="updateWeather" class="secondary">Refresh weather only</button>
+      <div class="status" id="status"></div>
+    </div>
+
+    <div class="panel" style="margin-top:20px">
+      <h2>Upcoming</h2>
+      <ul class="list" id="upcoming"></ul>
+    </div>
+
+    <div class="panel" style="margin-top:20px">
+      <h2>Data sources</h2>
+      <p class="small">Weather: <a href="https://open-meteo.com" style="color:var(--accent)">Open-Meteo</a> (no API key). Moon phases and sabbats are calculated locally from the date and region, so they work offline.</p>
+      <button id="exportData" class="secondary">Export saved data (JSON)</button>
+    </div>
+  </aside>
+
+  <section class="panel">
+    <div class="calhead">
+      <button id="prev" class="secondary" style="width:auto;margin:0;padding:5px 12px">&larr;</button>
+      <strong id="monthTitle"></strong>
+      <button id="next" class="secondary" style="width:auto;margin:0;padding:5px 12px">&rarr;</button>
+    </div>
+    <div class="grid" id="dows"></div>
+    <div class="grid" id="cal"></div>
+  </section>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---------- Constants ----------
+  const SYNODIC = 29.530588853;             // mean length of lunar month (days)
+  const KNOWN_NEW_MOON_JD = 2451550.09765;  // 2000-01-06 18:14 UTC
+  const PHASE_ICONS = ["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"];
+  const FULL_MOON_NAMES = [
+    "Wolf Moon", "Snow Moon", "Worm Moon", "Pink Moon", "Flower Moon", "Strawberry Moon",
+    "Buck Moon", "Sturgeon Moon", "Harvest Moon", "Hunter's Moon", "Beaver Moon", "Cold Moon"
+  ];
+  const WHEEL = [
+    // Approximate fixed dates (month, day) for the eight festivals; solstices and equinoxes
+    // are approximate (±1 day). Edit SABBATS to change dates or traditions.
+    { name: "Imbolc",     m: 2,  d: 1  },
+    { name: "Ostara",     m: 3,  d: 20 },
+    { name: "Beltane",    m: 5,  d: 1  },
+    { name: "Litha",      m: 6,  d: 21 },
+    { name: "Lughnasadh", m: 8,  d: 1  },
+    { name: "Mabon",      m: 9,  d: 22 },
+    { name: "Samhain",    m: 10, d: 31 },
+    { name: "Yule",       m: 12, d: 21 }
+  ];
+  const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const STORE_KEY = "almanac.v1";
+
+  // ---------- Moon math ----------
+  // Days since the known new moon, as a fraction of the synodic month (0 = new, 0.5 = full).
+  function moonAge(date) {
+    const jd = date.getTime() / 86400000 + 2440587.5;
+    let a = (jd - KNOWN_NEW_MOON_JD) / SYNODIC;
+    return a - Math.floor(a);
+  }
+  function phaseIcon(age) {
+    return PHASE_ICONS[Math.floor(((age + 1 / 16) % 1) * 8)];
+  }
+  function isFullMoonDay(dayStart, dayEnd) {
+    // Full moon falls in [dayStart, dayEnd) if the phase crosses 0.5 within that day.
+    // The a2 > a1 check skips the wrap-around at the new moon.
+    const a1 = moonAge(dayStart), a2 = moonAge(dayEnd);
+    return a2 > a1 && a1 < 0.5 && a2 >= 0.5;
+  }
+  function fullMoonName(date) {
+    // Traditional name by the calendar month of the full moon (local)
+    return FULL_MOON_NAMES[date.getMonth()];
+  }
+
+  // ---------- Storage ----------
+  function load() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch { return {}; }
+  }
+  function save(obj) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(obj)); } catch {}
+  }
+
+  // ---------- Weather (Open-Meteo, no key) ----------
+  async function fetchWeather(lat, lon, tz) {
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=" + encodeURIComponent(lat) +
+      "&longitude=" + encodeURIComponent(lon) +
+      "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
+      "&timezone=" + encodeURIComponent(tz) + "&forecast_days=16";
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Weather service returned " + res.status);
+    const j = await res.json();
+    const out = {};
+    j.daily.time.forEach((date, i) => {
+      out[date] = {
+        hi: Math.round(j.daily.temperature_2m_max[i]),
+        lo: Math.round(j.daily.temperature_2m_min[i]),
+        rain: j.daily.precipitation_probability_max[i]
+      };
+    });
+    return out;
+  }
+
+  // ---------- State ----------
+  let state = load();
+  let view = new Date();
+  view = new Date(view.getFullYear(), view.getMonth(), 1);
+
+  const $ = (id) => document.getElementById(id);
+  const statusEl = $("status");
+  const setStatus = (msg) => { statusEl.textContent = msg; };
+
+  function fillForm() {
+    const r = state.region || {};
+    $("regionName").value = r.name || "";
+    $("lat").value = r.lat ?? "";
+    $("lon").value = r.lon ?? "";
+    $("tz").value = r.tz || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  }
+
+  // ---------- Rendering ----------
+  function sabbatsForYear(y) {
+    return WHEEL.map(s => ({ ...s, date: new Date(y, s.m - 1, s.d) }));
+  }
+  function sabbatOn(date) {
+    const y = date.getFullYear();
+    return sabbatsForYear(y).find(s => s.date.toDateString() === date.toDateString());
+  }
+
+  function renderCalendar() {
+    const y = view.getFullYear(), m = view.getMonth();
+    $("monthTitle").textContent = view.toLocaleString(undefined, { month: "long", year: "numeric" });
+    $("dows").innerHTML = DOW.map(d => `<div class="dow">${d}</div>`).join("");
+
+    const first = new Date(y, m, 1).getDay();
+    const days = new Date(y, m + 1, 0).getDate();
+    const weather = (state.weather) || {};
+    const today = new Date().toDateString();
+    let html = "";
+    for (let i = 0; i < first; i++) html += `<div class="day blank"></div>`;
+
+    for (let d = 1; d <= days; d++) {
+      const dayStart = new Date(y, m, d);
+      const dayEnd = new Date(y, m, d + 1);
+      const age = moonAge(new Date(y, m, d, 12));
+      const icon = phaseIcon(age);
+      const full = isFullMoonDay(dayStart, dayEnd);
+      const sab = sabbatOn(dayStart);
+      const key = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      const w = weather[key];
+      const cls = ["day", full ? "full" : "", dayStart.toDateString() === today ? "today" : ""].join(" ");
+      html += `<div class="${cls}">
+        <div class="num">${d}</div>
+        <div class="moon" title="${full ? fullMoonName(dayStart) : ""}">${icon}</div>
+        ${full ? `<span class="tag">${fullMoonName(dayStart)}</span>` : ""}
+        ${sab ? `<span class="tag">✦ ${sab.name}</span>` : ""}
+        ${w ? `<div class="weather">${w.hi}°/${w.lo}° · ${w.rain}%</div>` : ""}
+      </div>`;
+    }
+    $("cal").innerHTML = html;
+  }
+
+  function renderUpcoming() {
+    const items = [];
+    const now = new Date();
+    const horizon = new Date(now.getTime() + 120 * 86400000);
+    // Full moons
+    for (let t = new Date(now.getFullYear(), now.getMonth(), now.getDate()); t < horizon; t = new Date(t.getTime() + 86400000)) {
+      const nx = new Date(t.getTime() + 86400000);
+      if (isFullMoonDay(t, nx)) items.push({ date: t, label: fullMoonName(t) + " (full moon)" });
+    }
+    // Sabbats
+    [now.getFullYear(), now.getFullYear() + 1].forEach(y => {
+      sabbatsForYear(y).forEach(s => {
+        if (s.date >= now && s.date < horizon) items.push({ date: s.date, label: "✦ " + s.name });
+      });
+    });
+    items.sort((a, b) => a.date - b.date);
+    $("upcoming").innerHTML = items.slice(0, 12).map(i =>
+      `<li><span>${i.label}</span><span class="d">${i.date.toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span></li>`
+    ).join("") || `<li><span>Nothing in the next 4 months.</span></li>`;
+  }
+
+  function renderAll() {
+    renderCalendar();
+    renderUpcoming();
+    const u = state.updated ? new Date(state.updated).toLocaleString() : null;
+    $("updated").textContent = state.region
+      ? `${state.region.name || "Region"} · ${u ? "updated " + u : "weather not yet fetched"}`
+      : "Not yet updated for a region.";
+  }
+
+  // ---------- Actions ----------
+  function readRegionForm() {
+    const lat = parseFloat($("lat").value), lon = parseFloat($("lon").value);
+    if (!isFinite(lat) || lat < -90 || lat > 90) throw new Error("Enter a latitude between -90 and 90.");
+    if (!isFinite(lon) || lon < -180 || lon > 180) throw new Error("Enter a longitude between -180 and 180.");
+    return {
+      name: $("regionName").value.trim(),
+      lat, lon,
+      tz: $("tz").value.trim() || Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
+  }
+
+  async function updateWeather() {
+    if (!state.region) throw new Error("Save a region first.");
+    setStatus("Fetching weather…");
+    state.weather = await fetchWeather(state.region.lat, state.region.lon, state.region.tz);
+    state.updated = new Date().toISOString();
+    save(state);
+    setStatus("Weather updated.");
+    renderAll();
+  }
+
+  $("saveRegion").addEventListener("click", async () => {
+    try {
+      state.region = readRegionForm();
+      save(state);
+      await updateWeather();
+    } catch (e) {
+      setStatus(e.message);
+    }
+  });
+  $("updateWeather").addEventListener("click", async () => {
+    try { await updateWeather(); } catch (e) { setStatus(e.message); }
+  });
+  $("prev").addEventListener("click", () => { view = new Date(view.getFullYear(), view.getMonth() - 1, 1); renderCalendar(); });
+  $("next").addEventListener("click", () => { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); renderCalendar(); });
+  $("exportData").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "almanac-data.json";
+    a.click();
+  });
+
+  fillForm();
+  renderAll();
+})();
+</script>
+</body>
+</html>
