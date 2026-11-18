@@ -59,9 +59,17 @@
       </div>
       <label for="tz">Time zone</label>
       <input id="tz" placeholder="America/Chicago">
+      <label for="tradition">Festival tradition</label>
+      <select id="tradition"></select>
+      <div class="small" id="traditionNote" style="margin-top:4px"></div>
       <button id="saveRegion">Save region &amp; update data</button>
       <button id="updateWeather" class="secondary">Refresh weather only</button>
       <div class="status" id="status"></div>
+    </div>
+
+    <div class="panel" style="margin-top:20px">
+      <h2>Today</h2>
+      <div class="small" id="today" style="line-height:1.6"></div>
     </div>
 
     <div class="panel" style="margin-top:20px">
@@ -99,18 +107,50 @@
     "Wolf Moon", "Snow Moon", "Worm Moon", "Pink Moon", "Flower Moon", "Strawberry Moon",
     "Buck Moon", "Sturgeon Moon", "Harvest Moon", "Hunter's Moon", "Beaver Moon", "Cold Moon"
   ];
-  const WHEEL = [
-    // Approximate fixed dates (month, day) for the eight festivals; solstices and equinoxes
-    // are approximate (±1 day). Edit SABBATS to change dates or traditions.
-    { name: "Imbolc",     m: 2,  d: 1  },
-    { name: "Ostara",     m: 3,  d: 20 },
-    { name: "Beltane",    m: 5,  d: 1  },
-    { name: "Litha",      m: 6,  d: 21 },
-    { name: "Lughnasadh", m: 8,  d: 1  },
-    { name: "Mabon",      m: 9,  d: 22 },
-    { name: "Samhain",    m: 10, d: 31 },
-    { name: "Yule",       m: 12, d: 21 }
-  ];
+  // Each festival is either a fixed calendar date ({m, d}) or a solar longitude ({solar: degrees}),
+  // where 0 = March equinox, 90 = June solstice, 180 = September equinox, 270 = December solstice.
+  // Cross-quarter days in the solar tradition sit at 45, 135, 225 and 315 degrees.
+  const TRADITIONS = {
+    fixed: {
+      label: "Fixed dates (default)",
+      festivals: [
+        { name: "Imbolc",     m: 2,  d: 1  },
+        { name: "Ostara",     m: 3,  d: 20 },
+        { name: "Beltane",    m: 5,  d: 1  },
+        { name: "Litha",      m: 6,  d: 21 },
+        { name: "Lughnasadh", m: 8,  d: 1  },
+        { name: "Mabon",      m: 9,  d: 22 },
+        { name: "Samhain",    m: 10, d: 31 },
+        { name: "Yule",       m: 12, d: 21 }
+      ]
+    },
+    neopagan: {
+      label: "Astronomical quarters, fixed cross-quarters",
+      festivals: [
+        { name: "Imbolc",     m: 2,  d: 1  },
+        { name: "Ostara",     solar: 0   },
+        { name: "Beltane",    m: 5,  d: 1  },
+        { name: "Litha",      solar: 90  },
+        { name: "Lughnasadh", m: 8,  d: 1  },
+        { name: "Mabon",      solar: 180 },
+        { name: "Samhain",    m: 10, d: 31 },
+        { name: "Yule",       solar: 270 }
+      ]
+    },
+    solar: {
+      label: "All solar (cross-quarters at 45° steps)",
+      festivals: [
+        { name: "Imbolc",     solar: 315 },
+        { name: "Ostara",     solar: 0   },
+        { name: "Beltane",    solar: 45  },
+        { name: "Litha",      solar: 90  },
+        { name: "Lughnasadh", solar: 135 },
+        { name: "Mabon",      solar: 180 },
+        { name: "Samhain",    solar: 225 },
+        { name: "Yule",       solar: 270 }
+      ]
+    }
+  };
   const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   const STORE_KEY = "almanac.v1";
 
@@ -133,6 +173,61 @@
   function fullMoonName(date) {
     // Traditional name by the calendar month of the full moon (local)
     return FULL_MOON_NAMES[date.getMonth()];
+  }
+
+  // ---------- Sun math (NOAA-style low-precision formulas, accurate to about a minute) ----------
+  const rad = (deg) => deg * Math.PI / 180;
+  const deg = (r) => r * 180 / Math.PI;
+  const mod360 = (x) => ((x % 360) + 360) % 360;
+  const toJD = (ms) => ms / 86400000 + 2440587.5;
+  const fromJD = (jd) => new Date((jd - 2440587.5) * 86400000);
+
+  // Ecliptic longitude of the sun (degrees) at a Julian day
+  function solarLongitude(jd) {
+    const n = jd - 2451545.0;
+    const M = mod360(357.5291 + 0.98560028 * n);
+    const C = 1.9148 * Math.sin(rad(M)) + 0.02 * Math.sin(rad(2 * M)) + 0.0003 * Math.sin(rad(3 * M));
+    return mod360(M + C + 180 + 102.9372);
+  }
+
+  // Sunrise and sunset for a calendar date at a location. Returns null during polar day or night.
+  function sunTimes(y, m, d, lat, lon) {
+    const jdNoon = toJD(Date.UTC(y, m, d, 12));
+    // n: whole days since J2000 for this calendar date; jStar: mean solar noon at this longitude
+    const n = Math.round(jdNoon - 2451545.0009 + lon / 360);
+    const jStar = n - lon / 360;
+    const M = mod360(357.5291 + 0.98560028 * jStar);
+    const C = 1.9148 * Math.sin(rad(M)) + 0.02 * Math.sin(rad(2 * M)) + 0.0003 * Math.sin(rad(3 * M));
+    const lam = mod360(M + C + 180 + 102.9372);
+    const jTransit = 2451545 + jStar + 0.0053 * Math.sin(rad(M)) - 0.0069 * Math.sin(rad(2 * lam));
+    const sinDec = Math.sin(rad(lam)) * Math.sin(rad(23.4397));
+    const cosDec = Math.sqrt(1 - sinDec * sinDec);
+    const cosW = (Math.sin(rad(-0.833)) - Math.sin(rad(lat)) * sinDec) / (Math.cos(rad(lat)) * cosDec);
+    if (cosW > 1 || cosW < -1) return null;
+    const w = deg(Math.acos(cosW));
+    return {
+      rise: fromJD(jTransit - w / 360),
+      set: fromJD(jTransit + w / 360)
+    };
+  }
+
+  // Find the calendar date (local) when the sun reaches a given ecliptic longitude in a year.
+  function solarDate(y, targetDeg) {
+    const start = Date.UTC(y, 0, 1);
+    let prev = solarLongitude(toJD(start));
+    for (let day = 1; day <= 366; day++) {
+      const t = start + day * 86400000;
+      const cur = solarLongitude(toJD(t));
+      const span = mod360(cur - prev);
+      const offset = mod360(targetDeg - prev);
+      if (offset <= span) {
+        const frac = span === 0 ? 0 : offset / span;
+        const when = new Date(t - 86400000 + frac * 86400000);
+        return new Date(when.getUTCFullYear(), when.getUTCMonth(), when.getUTCDate());
+      }
+      prev = cur;
+    }
+    return null;
   }
 
   // ---------- Storage ----------
@@ -178,15 +273,57 @@
     $("lat").value = r.lat ?? "";
     $("lon").value = r.lon ?? "";
     $("tz").value = r.tz || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const sel = $("tradition");
+    sel.innerHTML = Object.keys(TRADITIONS).map(k =>
+      `<option value="${k}">${TRADITIONS[k].label}</option>`).join("");
+    sel.value = currentTradition();
+    showTraditionNote();
   }
+  function showTraditionNote() {
+    const names = TRADITIONS[currentTradition()].festivals.map(f => f.name).join(", ");
+    $("traditionNote").textContent = "Festivals: " + names + ". Solar dates use the sun's position for the year.";
+  }
+  $("tradition").addEventListener("change", (e) => {
+    state.tradition = e.target.value;
+    save(state);
+    showTraditionNote();
+    renderAll();
+  });
 
   // ---------- Rendering ----------
+  const sabbatCache = {};
+  function currentTradition() {
+    return TRADITIONS[state.tradition] ? state.tradition : "fixed";
+  }
   function sabbatsForYear(y) {
-    return WHEEL.map(s => ({ ...s, date: new Date(y, s.m - 1, s.d) }));
+    const key = currentTradition() + "-" + y;
+    if (sabbatCache[key]) return sabbatCache[key];
+    const list = TRADITIONS[currentTradition()].festivals.map(f => ({
+      name: f.name,
+      date: f.solar !== undefined ? solarDate(y, f.solar) : new Date(y, f.m - 1, f.d)
+    })).filter(s => s.date);
+    sabbatCache[key] = list;
+    return list;
   }
   function sabbatOn(date) {
     const y = date.getFullYear();
     return sabbatsForYear(y).find(s => s.date.toDateString() === date.toDateString());
+  }
+
+  function fmtTime(d) {
+    const tz = (state.region && state.region.tz) || undefined;
+    try {
+      return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", timeZone: tz });
+    } catch {
+      return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    }
+  }
+  function sunInfo(date) {
+    if (!state.region) return null;
+    const s = sunTimes(date.getFullYear(), date.getMonth(), date.getDate(), state.region.lat, state.region.lon);
+    if (!s) return { polar: true };
+    const mins = (s.set - s.rise) / 60000;
+    return { rise: fmtTime(s.rise), set: fmtTime(s.set), dayLen: Math.floor(mins / 60) + "h " + Math.round(mins % 60) + "m" };
   }
 
   function renderCalendar() {
@@ -210,16 +347,26 @@
       const sab = sabbatOn(dayStart);
       const key = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
       const w = weather[key];
+      const sun = sunInfo(dayStart);
       const cls = ["day", full ? "full" : "", dayStart.toDateString() === today ? "today" : ""].join(" ");
       html += `<div class="${cls}">
         <div class="num">${d}</div>
         <div class="moon" title="${full ? fullMoonName(dayStart) : ""}">${icon}</div>
         ${full ? `<span class="tag">${fullMoonName(dayStart)}</span>` : ""}
         ${sab ? `<span class="tag">✦ ${sab.name}</span>` : ""}
+        ${sun && !sun.polar ? `<div class="weather">☀ ${sun.rise} · ${sun.set}</div>` : ""}
         ${w ? `<div class="weather">${w.hi}°/${w.lo}° · ${w.rain}%</div>` : ""}
       </div>`;
     }
     $("cal").innerHTML = html;
+  }
+
+  function renderToday() {
+    const el = $("today");
+    const info = sunInfo(new Date());
+    if (!info) { el.textContent = "Save a region to see sunrise and sunset."; return; }
+    if (info.polar) { el.textContent = "Polar day or night at this location today."; return; }
+    el.innerHTML = `Sunrise <strong>${info.rise}</strong> · Sunset <strong>${info.set}</strong><br>Day length ${info.dayLen}`;
   }
 
   function renderUpcoming() {
@@ -245,6 +392,7 @@
 
   function renderAll() {
     renderCalendar();
+    renderToday();
     renderUpcoming();
     const u = state.updated ? new Date(state.updated).toLocaleString() : null;
     $("updated").textContent = state.region
