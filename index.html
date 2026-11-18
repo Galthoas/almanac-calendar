@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Almanac &amp; Pagan Calendar</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="theme-color" content="#1d1a16">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Almanac">
 <style>
   :root {
     --bg: #1d1a16; --panel: #2a251f; --ink: #efe6d2; --muted: #a89c86;
@@ -361,12 +367,23 @@
     $("cal").innerHTML = html;
   }
 
+  function phaseName(age) {
+    const names = ["New moon", "Waxing crescent", "First quarter", "Waxing gibbous",
+      "Full moon", "Waning gibbous", "Last quarter", "Waning crescent"];
+    return names[Math.floor(((age + 1 / 16) % 1) * 8)];
+  }
   function renderToday() {
     const el = $("today");
-    const info = sunInfo(new Date());
-    if (!info) { el.textContent = "Save a region to see sunrise and sunset."; return; }
-    if (info.polar) { el.textContent = "Polar day or night at this location today."; return; }
-    el.innerHTML = `Sunrise <strong>${info.rise}</strong> · Sunset <strong>${info.set}</strong><br>Day length ${info.dayLen}`;
+    const now = new Date();
+    const age = moonAge(now);
+    const lit = Math.round((1 - Math.cos(2 * Math.PI * age)) / 2 * 100);
+    const moonLine = `${phaseIcon(age)} <strong>${phaseName(age)}</strong>, ${lit}% lit`;
+    const info = sunInfo(now);
+    let sunLine;
+    if (!info) sunLine = "Save a region to see sunrise and sunset.";
+    else if (info.polar) sunLine = "Polar day or night at this location today.";
+    else sunLine = `Sunrise <strong>${info.rise}</strong> · Sunset <strong>${info.set}</strong><br>Day length ${info.dayLen}`;
+    el.innerHTML = `${moonLine}<br>${sunLine}`;
   }
 
   function renderUpcoming() {
@@ -395,8 +412,9 @@
     renderToday();
     renderUpcoming();
     const u = state.updated ? new Date(state.updated).toLocaleString() : null;
+    const offline = navigator.onLine === false;
     $("updated").textContent = state.region
-      ? `${state.region.name || "Region"} · ${u ? "updated " + u : "weather not yet fetched"}`
+      ? `${state.region.name || "Region"} · ${u ? (offline ? "offline, forecast from " : "updated ") + u : "weather not yet fetched"}`
       : "Not yet updated for a region.";
   }
 
@@ -446,6 +464,11 @@
 
   fillForm();
   renderAll();
+
+  // Offline support: register the service worker where supported (needs http(s) or localhost).
+  if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
 })();
 </script>
 </body>

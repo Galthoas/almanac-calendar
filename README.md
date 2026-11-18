@@ -6,7 +6,22 @@ forecast for a region you choose.
 
 ## Running it
 
-Open `index.html` in any modern browser. No build step or server is needed.
+Open `index.html` in any modern browser. No build step is needed.
+
+### Install on a phone or computer
+
+Serve the folder over HTTPS (any static host, such as GitHub Pages), open it in Safari or
+Chrome, and choose **Add to Home Screen** (iPhone) or **Install app** (Android/desktop).
+It then opens full screen like an app.
+
+### Offline
+
+The service worker (`sw.js`) caches the app itself on the first visit, so it opens without
+a connection. Moon phases, sunrise and sunset, and festivals are calculated on the device.
+Weather uses the last forecast saved for your region when you're offline.
+
+**Note:** a web app can't place a live widget on a phone's home screen. The home-screen
+icon opens the full app. A true widget needs a native Android or iOS build, which is a separate project.
 
 ## Features
 
