@@ -20,6 +20,17 @@ The service worker (`sw.js`) caches the app itself on the first visit, so it ope
 a connection. Moon phases, sunrise and sunset, and festivals are calculated on the device.
 Weather uses the last forecast saved for your region when you're offline.
 
+### Sync between phone and computer
+
+Your region and festival tradition sync through a private GitHub Gist. Open the app on
+each device, go to **Sync across devices**, and paste a GitHub fine-grained token that has
+only the **Gists** permission. The first device creates the Gist, and later devices find it
+automatically. Changes made offline are pushed when the device reconnects. If two devices
+changed settings, the most recent change wins.
+
+The forecast isn't synced. Each device fetches its own when online, and refreshes it when
+the app opens or reconnects if the saved one is more than 3 hours old.
+
 **Note:** a web app can't place a live widget on a phone's home screen. The home-screen
 icon opens the full app. A true widget needs a native Android or iOS build, which is a separate project.
 
