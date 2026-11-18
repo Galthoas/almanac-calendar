@@ -42,9 +42,9 @@ icon opens the full app. A true widget needs a native Android or iOS build, whic
 - **Moon phases:** calculated locally for every day, with traditional full-moon names.
 - **Sunrise and sunset:** calculated for the saved region and shown on each day and in the "Today" panel, with day length.
 - **Festival tradition:** choose how the eight festivals are dated:
-  - *Fixed dates (default):* Ostara March 20, Litha June 21, Mabon September 22, Yule December 21, and the cross-quarters on the 1st of Feb, May and Aug, and Oct 31.
-  - *Astronomical quarters:* the solstices and equinoxes are set by the sun's position each year, and the cross-quarters keep their fixed dates.
-  - *All solar:* every festival is set by the sun's position, with cross-quarters at 45° steps of solar longitude.
+  - _Fixed dates (default):_ Ostara March 20, Litha June 21, Mabon September 22, Yule December 21, and the cross-quarters on the 1st of Feb, May and Aug, and Oct 31.
+  - _Astronomical quarters:_ the solstices and equinoxes are set by the sun's position each year, and the cross-quarters keep their fixed dates.
+  - _All solar:_ every festival is set by the sun's position, with cross-quarters at 45° steps of solar longitude.
 - **Wheel of the Year:** the festivals shown on the calendar and in the "Upcoming" list.
 - **Export:** saves the stored region, tradition and forecast as JSON.
 

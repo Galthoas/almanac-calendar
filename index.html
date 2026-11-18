@@ -1,376 +1,646 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Almanac &amp; Pagan Calendar</title>
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon.svg">
-<meta name="theme-color" content="#1d1a16">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Almanac">
-<style>
-  :root {
-    --bg: #1d1a16; --panel: #2a251f; --ink: #efe6d2; --muted: #a89c86;
-    --accent: #c8a45a; --sabbat: #7fb069; --full: #f2d16b; --line: #3d352b;
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; font-family: Georgia, "Times New Roman", serif; background: var(--bg); color: var(--ink); }
-  header { padding: 16px 20px; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
-  h1 { margin: 0; font-size: 1.4rem; color: var(--accent); }
-  main { display: grid; grid-template-columns: 300px 1fr; gap: 20px; padding: 20px; }
-  @media (max-width: 800px) { main { grid-template-columns: 1fr; } }
-  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
-  .panel h2 { font-size: 1rem; margin: 0 0 10px; color: var(--accent); }
-  label { display: block; font-size: .85rem; color: var(--muted); margin: 8px 0 3px; }
-  input, select, button { width: 100%; padding: 7px 9px; border-radius: 5px; border: 1px solid var(--line); background: #171410; color: var(--ink); font: inherit; }
-  button { background: var(--accent); color: #1d1a16; border: none; cursor: pointer; margin-top: 10px; font-weight: bold; }
-  button.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
-  .row { display: flex; gap: 8px; }
-  .row > * { flex: 1; }
-  .small { font-size: .8rem; color: var(--muted); line-height: 1.4; }
-  .calhead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-  .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-  .dow { text-align: center; font-size: .75rem; color: var(--muted); padding: 4px 0; }
-  .day { min-height: 74px; background: #221e19; border: 1px solid var(--line); border-radius: 5px; padding: 4px; font-size: .75rem; overflow: hidden; }
-  .day.blank { background: transparent; border-color: transparent; }
-  .day.today { border-color: var(--accent); }
-  .num { font-size: .9rem; color: var(--ink); }
-  .moon { font-size: 1.1rem; }
-  .tag { display: block; color: var(--sabbat); font-size: .68rem; line-height: 1.2; margin-top: 2px; }
-  .full .moon { color: var(--full); }
-  .weather { font-size: .68rem; color: var(--muted); }
-  .list { list-style: none; padding: 0; margin: 0; font-size: .9rem; }
-  .list li { padding: 6px 0; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 8px; }
-  .list li span.d { color: var(--muted); white-space: nowrap; }
-  .status { font-size: .8rem; color: var(--muted); margin-top: 8px; min-height: 1em; }
-</style>
-</head>
-<body>
-<header>
-  <h1>Almanac &amp; Pagan Calendar</h1>
-  <div class="small" id="updated">Not yet updated for a region.</div>
-</header>
-
-<main>
-  <aside>
-    <div class="panel">
-      <h2>Region</h2>
-      <label for="regionName">Name</label>
-      <input id="regionName" placeholder="e.g. Central Texas">
-      <div class="row">
-        <div><label for="lat">Latitude</label><input id="lat" type="number" step="0.0001" placeholder="30.2672"></div>
-        <div><label for="lon">Longitude</label><input id="lon" type="number" step="0.0001" placeholder="-97.7431"></div>
-      </div>
-      <label for="tz">Time zone</label>
-      <input id="tz" placeholder="America/Chicago">
-      <label for="tradition">Festival tradition</label>
-      <select id="tradition"></select>
-      <div class="small" id="traditionNote" style="margin-top:4px"></div>
-      <button id="saveRegion">Save region &amp; update data</button>
-      <button id="updateWeather" class="secondary">Refresh weather only</button>
-      <div class="status" id="status"></div>
-    </div>
-
-    <div class="panel" style="margin-top:20px">
-      <h2>Sync across devices</h2>
-      <div id="syncSetup">
-        <p class="small">Keeps your region and tradition the same on your phone and computer, using a private GitHub Gist. Create a fine-grained token at GitHub → Settings → Developer settings → Personal access tokens, with only the <strong>Gists</strong> permission (read and write). Paste it below. It's stored only on this device.</p>
-        <label for="syncToken">GitHub token</label>
-        <input id="syncToken" type="password" autocomplete="off">
-        <button id="connectSync">Connect sync</button>
-      </div>
-      <div id="syncConnected" style="display:none">
-        <button id="syncNowBtn" class="secondary">Sync now</button>
-        <button id="disconnectSync" class="secondary">Disconnect this device</button>
-      </div>
-      <div class="status" id="syncStatus"></div>
-    </div>
-
-    <div class="panel" style="margin-top:20px">
-      <h2>Today</h2>
-      <div class="small" id="today" style="line-height:1.6"></div>
-    </div>
-
-    <div class="panel" style="margin-top:20px">
-      <h2>Upcoming</h2>
-      <ul class="list" id="upcoming"></ul>
-    </div>
-
-    <div class="panel" style="margin-top:20px">
-      <h2>Data sources</h2>
-      <p class="small">Weather: <a href="https://open-meteo.com" style="color:var(--accent)">Open-Meteo</a> (no API key). Moon phases and sabbats are calculated locally from the date and region, so they work offline.</p>
-      <button id="exportData" class="secondary">Export saved data (JSON)</button>
-    </div>
-  </aside>
-
-  <section class="panel">
-    <div class="calhead">
-      <button id="prev" class="secondary" style="width:auto;margin:0;padding:5px 12px">&larr;</button>
-      <strong id="monthTitle"></strong>
-      <button id="next" class="secondary" style="width:auto;margin:0;padding:5px 12px">&rarr;</button>
-    </div>
-    <div class="grid" id="dows"></div>
-    <div class="grid" id="cal"></div>
-  </section>
-</main>
-
-<script>
-(() => {
-  "use strict";
-
-  // ---------- Constants ----------
-  const SYNODIC = 29.530588853;             // mean length of lunar month (days)
-  const KNOWN_NEW_MOON_JD = 2451550.09765;  // 2000-01-06 18:14 UTC
-  const PHASE_ICONS = ["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"];
-  const FULL_MOON_NAMES = [
-    "Wolf Moon", "Snow Moon", "Worm Moon", "Pink Moon", "Flower Moon", "Strawberry Moon",
-    "Buck Moon", "Sturgeon Moon", "Harvest Moon", "Hunter's Moon", "Beaver Moon", "Cold Moon"
-  ];
-  // Each festival is either a fixed calendar date ({m, d}) or a solar longitude ({solar: degrees}),
-  // where 0 = March equinox, 90 = June solstice, 180 = September equinox, 270 = December solstice.
-  // Cross-quarter days in the solar tradition sit at 45, 135, 225 and 315 degrees.
-  const TRADITIONS = {
-    fixed: {
-      label: "Fixed dates (default)",
-      festivals: [
-        { name: "Imbolc",     m: 2,  d: 1  },
-        { name: "Ostara",     m: 3,  d: 20 },
-        { name: "Beltane",    m: 5,  d: 1  },
-        { name: "Litha",      m: 6,  d: 21 },
-        { name: "Lughnasadh", m: 8,  d: 1  },
-        { name: "Mabon",      m: 9,  d: 22 },
-        { name: "Samhain",    m: 10, d: 31 },
-        { name: "Yule",       m: 12, d: 21 }
-      ]
-    },
-    neopagan: {
-      label: "Astronomical quarters, fixed cross-quarters",
-      festivals: [
-        { name: "Imbolc",     m: 2,  d: 1  },
-        { name: "Ostara",     solar: 0   },
-        { name: "Beltane",    m: 5,  d: 1  },
-        { name: "Litha",      solar: 90  },
-        { name: "Lughnasadh", m: 8,  d: 1  },
-        { name: "Mabon",      solar: 180 },
-        { name: "Samhain",    m: 10, d: 31 },
-        { name: "Yule",       solar: 270 }
-      ]
-    },
-    solar: {
-      label: "All solar (cross-quarters at 45° steps)",
-      festivals: [
-        { name: "Imbolc",     solar: 315 },
-        { name: "Ostara",     solar: 0   },
-        { name: "Beltane",    solar: 45  },
-        { name: "Litha",      solar: 90  },
-        { name: "Lughnasadh", solar: 135 },
-        { name: "Mabon",      solar: 180 },
-        { name: "Samhain",    solar: 225 },
-        { name: "Yule",       solar: 270 }
-      ]
-    }
-  };
-  const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  const STORE_KEY = "almanac.v1";
-
-  // ---------- Moon math ----------
-  // Days since the known new moon, as a fraction of the synodic month (0 = new, 0.5 = full).
-  function moonAge(date) {
-    const jd = date.getTime() / 86400000 + 2440587.5;
-    let a = (jd - KNOWN_NEW_MOON_JD) / SYNODIC;
-    return a - Math.floor(a);
-  }
-  function phaseIcon(age) {
-    return PHASE_ICONS[Math.floor(((age + 1 / 16) % 1) * 8)];
-  }
-  function isFullMoonDay(dayStart, dayEnd) {
-    // Full moon falls in [dayStart, dayEnd) if the phase crosses 0.5 within that day.
-    // The a2 > a1 check skips the wrap-around at the new moon.
-    const a1 = moonAge(dayStart), a2 = moonAge(dayEnd);
-    return a2 > a1 && a1 < 0.5 && a2 >= 0.5;
-  }
-  function fullMoonName(date) {
-    // Traditional name by the calendar month of the full moon (local)
-    return FULL_MOON_NAMES[date.getMonth()];
-  }
-
-  // ---------- Sun math (NOAA-style low-precision formulas, accurate to about a minute) ----------
-  const rad = (deg) => deg * Math.PI / 180;
-  const deg = (r) => r * 180 / Math.PI;
-  const mod360 = (x) => ((x % 360) + 360) % 360;
-  const toJD = (ms) => ms / 86400000 + 2440587.5;
-  const fromJD = (jd) => new Date((jd - 2440587.5) * 86400000);
-
-  // Ecliptic longitude of the sun (degrees) at a Julian day
-  function solarLongitude(jd) {
-    const n = jd - 2451545.0;
-    const M = mod360(357.5291 + 0.98560028 * n);
-    const C = 1.9148 * Math.sin(rad(M)) + 0.02 * Math.sin(rad(2 * M)) + 0.0003 * Math.sin(rad(3 * M));
-    return mod360(M + C + 180 + 102.9372);
-  }
-
-  // Sunrise and sunset for a calendar date at a location. Returns null during polar day or night.
-  function sunTimes(y, m, d, lat, lon) {
-    const jdNoon = toJD(Date.UTC(y, m, d, 12));
-    // n: whole days since J2000 for this calendar date; jStar: mean solar noon at this longitude
-    const n = Math.round(jdNoon - 2451545.0009 + lon / 360);
-    const jStar = n - lon / 360;
-    const M = mod360(357.5291 + 0.98560028 * jStar);
-    const C = 1.9148 * Math.sin(rad(M)) + 0.02 * Math.sin(rad(2 * M)) + 0.0003 * Math.sin(rad(3 * M));
-    const lam = mod360(M + C + 180 + 102.9372);
-    const jTransit = 2451545 + jStar + 0.0053 * Math.sin(rad(M)) - 0.0069 * Math.sin(rad(2 * lam));
-    const sinDec = Math.sin(rad(lam)) * Math.sin(rad(23.4397));
-    const cosDec = Math.sqrt(1 - sinDec * sinDec);
-    const cosW = (Math.sin(rad(-0.833)) - Math.sin(rad(lat)) * sinDec) / (Math.cos(rad(lat)) * cosDec);
-    if (cosW > 1 || cosW < -1) return null;
-    const w = deg(Math.acos(cosW));
-    return {
-      rise: fromJD(jTransit - w / 360),
-      set: fromJD(jTransit + w / 360)
-    };
-  }
-
-  // Find the calendar date (local) when the sun reaches a given ecliptic longitude in a year.
-  function solarDate(y, targetDeg) {
-    const start = Date.UTC(y, 0, 1);
-    let prev = solarLongitude(toJD(start));
-    for (let day = 1; day <= 366; day++) {
-      const t = start + day * 86400000;
-      const cur = solarLongitude(toJD(t));
-      const span = mod360(cur - prev);
-      const offset = mod360(targetDeg - prev);
-      if (offset <= span) {
-        const frac = span === 0 ? 0 : offset / span;
-        const when = new Date(t - 86400000 + frac * 86400000);
-        return new Date(when.getUTCFullYear(), when.getUTCMonth(), when.getUTCDate());
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Almanac &amp; Pagan Calendar</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icon.svg" />
+    <meta name="theme-color" content="#1d1a16" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Almanac" />
+    <style>
+      :root {
+        --bg: #1d1a16;
+        --panel: #2a251f;
+        --ink: #efe6d2;
+        --muted: #a89c86;
+        --accent: #c8a45a;
+        --sabbat: #7fb069;
+        --full: #f2d16b;
+        --line: #3d352b;
       }
-      prev = cur;
-    }
-    return null;
-  }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        background: var(--bg);
+        color: var(--ink);
+      }
+      header {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      h1 {
+        margin: 0;
+        font-size: 1.4rem;
+        color: var(--accent);
+      }
+      main {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 20px;
+        padding: 20px;
+      }
+      @media (max-width: 800px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 14px;
+      }
+      .panel h2 {
+        font-size: 1rem;
+        margin: 0 0 10px;
+        color: var(--accent);
+      }
+      label {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin: 8px 0 3px;
+      }
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 7px 9px;
+        border-radius: 5px;
+        border: 1px solid var(--line);
+        background: #171410;
+        color: var(--ink);
+        font: inherit;
+      }
+      button {
+        background: var(--accent);
+        color: #1d1a16;
+        border: none;
+        cursor: pointer;
+        margin-top: 10px;
+        font-weight: bold;
+      }
+      button.secondary {
+        background: transparent;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+      }
+      .row > * {
+        flex: 1;
+      }
+      .small {
+        font-size: 0.8rem;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+      .calhead {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+      }
+      .dow {
+        text-align: center;
+        font-size: 0.75rem;
+        color: var(--muted);
+        padding: 4px 0;
+      }
+      .day {
+        min-height: 74px;
+        background: #221e19;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        padding: 4px;
+        font-size: 0.75rem;
+        overflow: hidden;
+      }
+      .day.blank {
+        background: transparent;
+        border-color: transparent;
+      }
+      .day.today {
+        border-color: var(--accent);
+      }
+      .num {
+        font-size: 0.9rem;
+        color: var(--ink);
+      }
+      .moon {
+        font-size: 1.1rem;
+      }
+      .tag {
+        display: block;
+        color: var(--sabbat);
+        font-size: 0.68rem;
+        line-height: 1.2;
+        margin-top: 2px;
+      }
+      .full .moon {
+        color: var(--full);
+      }
+      .weather {
+        font-size: 0.68rem;
+        color: var(--muted);
+      }
+      .list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-size: 0.9rem;
+      }
+      .list li {
+        padding: 6px 0;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .list li span.d {
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .status {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-top: 8px;
+        min-height: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Almanac &amp; Pagan Calendar</h1>
+      <div class="small" id="updated">Not yet updated for a region.</div>
+    </header>
 
-  // ---------- Storage ----------
-  function load() {
-    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch { return {}; }
-  }
-  function save(obj) {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(obj)); } catch {}
-  }
+    <main>
+      <aside>
+        <div class="panel">
+          <h2>Region</h2>
+          <label for="regionName">Name</label>
+          <input id="regionName" placeholder="e.g. Central Texas" />
+          <div class="row">
+            <div>
+              <label for="lat">Latitude</label
+              ><input
+                id="lat"
+                type="number"
+                step="0.0001"
+                placeholder="30.2672"
+              />
+            </div>
+            <div>
+              <label for="lon">Longitude</label
+              ><input
+                id="lon"
+                type="number"
+                step="0.0001"
+                placeholder="-97.7431"
+              />
+            </div>
+          </div>
+          <label for="tz">Time zone</label>
+          <input id="tz" placeholder="America/Chicago" />
+          <label for="tradition">Festival tradition</label>
+          <select id="tradition"></select>
+          <div class="small" id="traditionNote" style="margin-top: 4px"></div>
+          <button id="saveRegion">Save region &amp; update data</button>
+          <button id="updateWeather" class="secondary">
+            Refresh weather only
+          </button>
+          <div class="status" id="status"></div>
+        </div>
 
-  // ---------- Weather (Open-Meteo, no key) ----------
-  async function fetchWeather(lat, lon, tz) {
-    const url = "https://api.open-meteo.com/v1/forecast?latitude=" + encodeURIComponent(lat) +
-      "&longitude=" + encodeURIComponent(lon) +
-      "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
-      "&timezone=" + encodeURIComponent(tz) + "&forecast_days=16";
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("Weather service returned " + res.status);
-    const j = await res.json();
-    const out = {};
-    j.daily.time.forEach((date, i) => {
-      out[date] = {
-        hi: Math.round(j.daily.temperature_2m_max[i]),
-        lo: Math.round(j.daily.temperature_2m_min[i]),
-        rain: j.daily.precipitation_probability_max[i]
-      };
-    });
-    return out;
-  }
+        <div class="panel" style="margin-top: 20px">
+          <h2>Sync across devices</h2>
+          <div id="syncSetup">
+            <p class="small">
+              Keeps your region and tradition the same on your phone and
+              computer, using a private GitHub Gist. Create a fine-grained token
+              at GitHub → Settings → Developer settings → Personal access
+              tokens, with only the <strong>Gists</strong> permission (read and
+              write). Paste it below. It's stored only on this device.
+            </p>
+            <label for="syncToken">GitHub token</label>
+            <input id="syncToken" type="password" autocomplete="off" />
+            <button id="connectSync">Connect sync</button>
+          </div>
+          <div id="syncConnected" style="display: none">
+            <button id="syncNowBtn" class="secondary">Sync now</button>
+            <button id="disconnectSync" class="secondary">
+              Disconnect this device
+            </button>
+          </div>
+          <div class="status" id="syncStatus"></div>
+        </div>
 
-  // ---------- State ----------
-  let state = load();
-  let view = new Date();
-  view = new Date(view.getFullYear(), view.getMonth(), 1);
+        <div class="panel" style="margin-top: 20px">
+          <h2>Today</h2>
+          <div class="small" id="today" style="line-height: 1.6"></div>
+        </div>
 
-  const $ = (id) => document.getElementById(id);
-  const statusEl = $("status");
-  const setStatus = (msg) => { statusEl.textContent = msg; };
+        <div class="panel" style="margin-top: 20px">
+          <h2>Upcoming</h2>
+          <ul class="list" id="upcoming"></ul>
+        </div>
 
-  function fillForm() {
-    const r = state.region || {};
-    $("regionName").value = r.name || "";
-    $("lat").value = r.lat ?? "";
-    $("lon").value = r.lon ?? "";
-    $("tz").value = r.tz || Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const sel = $("tradition");
-    sel.innerHTML = Object.keys(TRADITIONS).map(k =>
-      `<option value="${k}">${TRADITIONS[k].label}</option>`).join("");
-    sel.value = currentTradition();
-    showTraditionNote();
-  }
-  function showTraditionNote() {
-    const names = TRADITIONS[currentTradition()].festivals.map(f => f.name).join(", ");
-    $("traditionNote").textContent = "Festivals: " + names + ". Solar dates use the sun's position for the year.";
-  }
-  $("tradition").addEventListener("change", (e) => {
-    state.tradition = e.target.value;
-    showTraditionNote();
-    touchSettings();
-    renderAll();
-  });
+        <div class="panel" style="margin-top: 20px">
+          <h2>Data sources</h2>
+          <p class="small">
+            Weather:
+            <a href="https://open-meteo.com" style="color: var(--accent)"
+              >Open-Meteo</a
+            >
+            (no API key). Moon phases and sabbats are calculated locally from
+            the date and region, so they work offline.
+          </p>
+          <button id="exportData" class="secondary">
+            Export saved data (JSON)
+          </button>
+        </div>
+      </aside>
 
-  // ---------- Rendering ----------
-  const sabbatCache = {};
-  function currentTradition() {
-    return TRADITIONS[state.tradition] ? state.tradition : "fixed";
-  }
-  function sabbatsForYear(y) {
-    const key = currentTradition() + "-" + y;
-    if (sabbatCache[key]) return sabbatCache[key];
-    const list = TRADITIONS[currentTradition()].festivals.map(f => ({
-      name: f.name,
-      date: f.solar !== undefined ? solarDate(y, f.solar) : new Date(y, f.m - 1, f.d)
-    })).filter(s => s.date);
-    sabbatCache[key] = list;
-    return list;
-  }
-  function sabbatOn(date) {
-    const y = date.getFullYear();
-    return sabbatsForYear(y).find(s => s.date.toDateString() === date.toDateString());
-  }
+      <section class="panel">
+        <div class="calhead">
+          <button
+            id="prev"
+            class="secondary"
+            style="width: auto; margin: 0; padding: 5px 12px"
+          >
+            &larr;
+          </button>
+          <strong id="monthTitle"></strong>
+          <button
+            id="next"
+            class="secondary"
+            style="width: auto; margin: 0; padding: 5px 12px"
+          >
+            &rarr;
+          </button>
+        </div>
+        <div class="grid" id="dows"></div>
+        <div class="grid" id="cal"></div>
+      </section>
+    </main>
 
-  function fmtTime(d) {
-    const tz = (state.region && state.region.tz) || undefined;
-    try {
-      return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", timeZone: tz });
-    } catch {
-      return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
-    }
-  }
-  function sunInfo(date) {
-    if (!state.region) return null;
-    const s = sunTimes(date.getFullYear(), date.getMonth(), date.getDate(), state.region.lat, state.region.lon);
-    if (!s) return { polar: true };
-    const mins = (s.set - s.rise) / 60000;
-    return { rise: fmtTime(s.rise), set: fmtTime(s.set), dayLen: Math.floor(mins / 60) + "h " + Math.round(mins % 60) + "m" };
-  }
+    <script>
+      (() => {
+        "use strict";
 
-  function renderCalendar() {
-    const y = view.getFullYear(), m = view.getMonth();
-    $("monthTitle").textContent = view.toLocaleString(undefined, { month: "long", year: "numeric" });
-    $("dows").innerHTML = DOW.map(d => `<div class="dow">${d}</div>`).join("");
+        // ---------- Constants ----------
+        const SYNODIC = 29.530588853; // mean length of lunar month (days)
+        const KNOWN_NEW_MOON_JD = 2451550.09765; // 2000-01-06 18:14 UTC
+        const PHASE_ICONS = ["🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"];
+        const FULL_MOON_NAMES = [
+          "Wolf Moon",
+          "Snow Moon",
+          "Worm Moon",
+          "Pink Moon",
+          "Flower Moon",
+          "Strawberry Moon",
+          "Buck Moon",
+          "Sturgeon Moon",
+          "Harvest Moon",
+          "Hunter's Moon",
+          "Beaver Moon",
+          "Cold Moon",
+        ];
+        // Each festival is either a fixed calendar date ({m, d}) or a solar longitude ({solar: degrees}),
+        // where 0 = March equinox, 90 = June solstice, 180 = September equinox, 270 = December solstice.
+        // Cross-quarter days in the solar tradition sit at 45, 135, 225 and 315 degrees.
+        const TRADITIONS = {
+          fixed: {
+            label: "Fixed dates (default)",
+            festivals: [
+              { name: "Imbolc", m: 2, d: 1 },
+              { name: "Ostara", m: 3, d: 20 },
+              { name: "Beltane", m: 5, d: 1 },
+              { name: "Litha", m: 6, d: 21 },
+              { name: "Lughnasadh", m: 8, d: 1 },
+              { name: "Mabon", m: 9, d: 22 },
+              { name: "Samhain", m: 10, d: 31 },
+              { name: "Yule", m: 12, d: 21 },
+            ],
+          },
+          neopagan: {
+            label: "Astronomical quarters, fixed cross-quarters",
+            festivals: [
+              { name: "Imbolc", m: 2, d: 1 },
+              { name: "Ostara", solar: 0 },
+              { name: "Beltane", m: 5, d: 1 },
+              { name: "Litha", solar: 90 },
+              { name: "Lughnasadh", m: 8, d: 1 },
+              { name: "Mabon", solar: 180 },
+              { name: "Samhain", m: 10, d: 31 },
+              { name: "Yule", solar: 270 },
+            ],
+          },
+          solar: {
+            label: "All solar (cross-quarters at 45° steps)",
+            festivals: [
+              { name: "Imbolc", solar: 315 },
+              { name: "Ostara", solar: 0 },
+              { name: "Beltane", solar: 45 },
+              { name: "Litha", solar: 90 },
+              { name: "Lughnasadh", solar: 135 },
+              { name: "Mabon", solar: 180 },
+              { name: "Samhain", solar: 225 },
+              { name: "Yule", solar: 270 },
+            ],
+          },
+        };
+        const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const STORE_KEY = "almanac.v1";
 
-    const first = new Date(y, m, 1).getDay();
-    const days = new Date(y, m + 1, 0).getDate();
-    const weather = (state.weather) || {};
-    const today = new Date().toDateString();
-    let html = "";
-    for (let i = 0; i < first; i++) html += `<div class="day blank"></div>`;
+        // ---------- Moon math ----------
+        // Days since the known new moon, as a fraction of the synodic month (0 = new, 0.5 = full).
+        function moonAge(date) {
+          const jd = date.getTime() / 86400000 + 2440587.5;
+          let a = (jd - KNOWN_NEW_MOON_JD) / SYNODIC;
+          return a - Math.floor(a);
+        }
+        function phaseIcon(age) {
+          return PHASE_ICONS[Math.floor(((age + 1 / 16) % 1) * 8)];
+        }
+        function isFullMoonDay(dayStart, dayEnd) {
+          // Full moon falls in [dayStart, dayEnd) if the phase crosses 0.5 within that day.
+          // The a2 > a1 check skips the wrap-around at the new moon.
+          const a1 = moonAge(dayStart),
+            a2 = moonAge(dayEnd);
+          return a2 > a1 && a1 < 0.5 && a2 >= 0.5;
+        }
+        function fullMoonName(date) {
+          // Traditional name by the calendar month of the full moon (local)
+          return FULL_MOON_NAMES[date.getMonth()];
+        }
 
-    for (let d = 1; d <= days; d++) {
-      const dayStart = new Date(y, m, d);
-      const dayEnd = new Date(y, m, d + 1);
-      const age = moonAge(new Date(y, m, d, 12));
-      const icon = phaseIcon(age);
-      const full = isFullMoonDay(dayStart, dayEnd);
-      const sab = sabbatOn(dayStart);
-      const key = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-      const w = weather[key];
-      const sun = sunInfo(dayStart);
-      const cls = ["day", full ? "full" : "", dayStart.toDateString() === today ? "today" : ""].join(" ");
-      html += `<div class="${cls}">
+        // ---------- Sun math (NOAA-style low-precision formulas, accurate to about a minute) ----------
+        const rad = (deg) => (deg * Math.PI) / 180;
+        const deg = (r) => (r * 180) / Math.PI;
+        const mod360 = (x) => ((x % 360) + 360) % 360;
+        const toJD = (ms) => ms / 86400000 + 2440587.5;
+        const fromJD = (jd) => new Date((jd - 2440587.5) * 86400000);
+
+        // Ecliptic longitude of the sun (degrees) at a Julian day
+        function solarLongitude(jd) {
+          const n = jd - 2451545.0;
+          const M = mod360(357.5291 + 0.98560028 * n);
+          const C =
+            1.9148 * Math.sin(rad(M)) +
+            0.02 * Math.sin(rad(2 * M)) +
+            0.0003 * Math.sin(rad(3 * M));
+          return mod360(M + C + 180 + 102.9372);
+        }
+
+        // Sunrise and sunset for a calendar date at a location. Returns null during polar day or night.
+        function sunTimes(y, m, d, lat, lon) {
+          const jdNoon = toJD(Date.UTC(y, m, d, 12));
+          // n: whole days since J2000 for this calendar date; jStar: mean solar noon at this longitude
+          const n = Math.round(jdNoon - 2451545.0009 + lon / 360);
+          const jStar = n - lon / 360;
+          const M = mod360(357.5291 + 0.98560028 * jStar);
+          const C =
+            1.9148 * Math.sin(rad(M)) +
+            0.02 * Math.sin(rad(2 * M)) +
+            0.0003 * Math.sin(rad(3 * M));
+          const lam = mod360(M + C + 180 + 102.9372);
+          const jTransit =
+            2451545 +
+            jStar +
+            0.0053 * Math.sin(rad(M)) -
+            0.0069 * Math.sin(rad(2 * lam));
+          const sinDec = Math.sin(rad(lam)) * Math.sin(rad(23.4397));
+          const cosDec = Math.sqrt(1 - sinDec * sinDec);
+          const cosW =
+            (Math.sin(rad(-0.833)) - Math.sin(rad(lat)) * sinDec) /
+            (Math.cos(rad(lat)) * cosDec);
+          if (cosW > 1 || cosW < -1) return null;
+          const w = deg(Math.acos(cosW));
+          return {
+            rise: fromJD(jTransit - w / 360),
+            set: fromJD(jTransit + w / 360),
+          };
+        }
+
+        // Find the calendar date (local) when the sun reaches a given ecliptic longitude in a year.
+        function solarDate(y, targetDeg) {
+          const start = Date.UTC(y, 0, 1);
+          let prev = solarLongitude(toJD(start));
+          for (let day = 1; day <= 366; day++) {
+            const t = start + day * 86400000;
+            const cur = solarLongitude(toJD(t));
+            const span = mod360(cur - prev);
+            const offset = mod360(targetDeg - prev);
+            if (offset <= span) {
+              const frac = span === 0 ? 0 : offset / span;
+              const when = new Date(t - 86400000 + frac * 86400000);
+              return new Date(
+                when.getUTCFullYear(),
+                when.getUTCMonth(),
+                when.getUTCDate(),
+              );
+            }
+            prev = cur;
+          }
+          return null;
+        }
+
+        // ---------- Storage ----------
+        function load() {
+          try {
+            return JSON.parse(localStorage.getItem(STORE_KEY)) || {};
+          } catch {
+            return {};
+          }
+        }
+        function save(obj) {
+          try {
+            localStorage.setItem(STORE_KEY, JSON.stringify(obj));
+          } catch {}
+        }
+
+        // ---------- Weather (Open-Meteo, no key) ----------
+        async function fetchWeather(lat, lon, tz) {
+          const url =
+            "https://api.open-meteo.com/v1/forecast?latitude=" +
+            encodeURIComponent(lat) +
+            "&longitude=" +
+            encodeURIComponent(lon) +
+            "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
+            "&timezone=" +
+            encodeURIComponent(tz) +
+            "&forecast_days=16";
+          const res = await fetch(url);
+          if (!res.ok)
+            throw new Error("Weather service returned " + res.status);
+          const j = await res.json();
+          const out = {};
+          j.daily.time.forEach((date, i) => {
+            out[date] = {
+              hi: Math.round(j.daily.temperature_2m_max[i]),
+              lo: Math.round(j.daily.temperature_2m_min[i]),
+              rain: j.daily.precipitation_probability_max[i],
+            };
+          });
+          return out;
+        }
+
+        // ---------- State ----------
+        let state = load();
+        let view = new Date();
+        view = new Date(view.getFullYear(), view.getMonth(), 1);
+
+        const $ = (id) => document.getElementById(id);
+        const statusEl = $("status");
+        const setStatus = (msg) => {
+          statusEl.textContent = msg;
+        };
+
+        function fillForm() {
+          const r = state.region || {};
+          $("regionName").value = r.name || "";
+          $("lat").value = r.lat ?? "";
+          $("lon").value = r.lon ?? "";
+          $("tz").value =
+            r.tz || Intl.DateTimeFormat().resolvedOptions().timeZone;
+          const sel = $("tradition");
+          sel.innerHTML = Object.keys(TRADITIONS)
+            .map((k) => `<option value="${k}">${TRADITIONS[k].label}</option>`)
+            .join("");
+          sel.value = currentTradition();
+          showTraditionNote();
+        }
+        function showTraditionNote() {
+          const names = TRADITIONS[currentTradition()].festivals
+            .map((f) => f.name)
+            .join(", ");
+          $("traditionNote").textContent =
+            "Festivals: " +
+            names +
+            ". Solar dates use the sun's position for the year.";
+        }
+        $("tradition").addEventListener("change", (e) => {
+          state.tradition = e.target.value;
+          showTraditionNote();
+          touchSettings();
+          renderAll();
+        });
+
+        // ---------- Rendering ----------
+        const sabbatCache = {};
+        function currentTradition() {
+          return TRADITIONS[state.tradition] ? state.tradition : "fixed";
+        }
+        function sabbatsForYear(y) {
+          const key = currentTradition() + "-" + y;
+          if (sabbatCache[key]) return sabbatCache[key];
+          const list = TRADITIONS[currentTradition()].festivals
+            .map((f) => ({
+              name: f.name,
+              date:
+                f.solar !== undefined
+                  ? solarDate(y, f.solar)
+                  : new Date(y, f.m - 1, f.d),
+            }))
+            .filter((s) => s.date);
+          sabbatCache[key] = list;
+          return list;
+        }
+        function sabbatOn(date) {
+          const y = date.getFullYear();
+          return sabbatsForYear(y).find(
+            (s) => s.date.toDateString() === date.toDateString(),
+          );
+        }
+
+        function fmtTime(d) {
+          const tz = (state.region && state.region.tz) || undefined;
+          try {
+            return d.toLocaleTimeString(undefined, {
+              hour: "numeric",
+              minute: "2-digit",
+              timeZone: tz,
+            });
+          } catch {
+            return d.toLocaleTimeString(undefined, {
+              hour: "numeric",
+              minute: "2-digit",
+            });
+          }
+        }
+        function sunInfo(date) {
+          if (!state.region) return null;
+          const s = sunTimes(
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate(),
+            state.region.lat,
+            state.region.lon,
+          );
+          if (!s) return { polar: true };
+          const mins = (s.set - s.rise) / 60000;
+          return {
+            rise: fmtTime(s.rise),
+            set: fmtTime(s.set),
+            dayLen: Math.floor(mins / 60) + "h " + Math.round(mins % 60) + "m",
+          };
+        }
+
+        function renderCalendar() {
+          const y = view.getFullYear(),
+            m = view.getMonth();
+          $("monthTitle").textContent = view.toLocaleString(undefined, {
+            month: "long",
+            year: "numeric",
+          });
+          $("dows").innerHTML = DOW.map(
+            (d) => `<div class="dow">${d}</div>`,
+          ).join("");
+
+          const first = new Date(y, m, 1).getDay();
+          const days = new Date(y, m + 1, 0).getDate();
+          const weather = state.weather || {};
+          const today = new Date().toDateString();
+          let html = "";
+          for (let i = 0; i < first; i++)
+            html += `<div class="day blank"></div>`;
+
+          for (let d = 1; d <= days; d++) {
+            const dayStart = new Date(y, m, d);
+            const dayEnd = new Date(y, m, d + 1);
+            const age = moonAge(new Date(y, m, d, 12));
+            const icon = phaseIcon(age);
+            const full = isFullMoonDay(dayStart, dayEnd);
+            const sab = sabbatOn(dayStart);
+            const key = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+            const w = weather[key];
+            const sun = sunInfo(dayStart);
+            const cls = [
+              "day",
+              full ? "full" : "",
+              dayStart.toDateString() === today ? "today" : "",
+            ].join(" ");
+            html += `<div class="${cls}">
         <div class="num">${d}</div>
         <div class="moon" title="${full ? fullMoonName(dayStart) : ""}">${icon}</div>
         ${full ? `<span class="tag">${fullMoonName(dayStart)}</span>` : ""}
@@ -378,253 +648,351 @@
         ${sun && !sun.polar ? `<div class="weather">☀ ${sun.rise} · ${sun.set}</div>` : ""}
         ${w ? `<div class="weather">${w.hi}°/${w.lo}° · ${w.rain}%</div>` : ""}
       </div>`;
-    }
-    $("cal").innerHTML = html;
-  }
-
-  function phaseName(age) {
-    const names = ["New moon", "Waxing crescent", "First quarter", "Waxing gibbous",
-      "Full moon", "Waning gibbous", "Last quarter", "Waning crescent"];
-    return names[Math.floor(((age + 1 / 16) % 1) * 8)];
-  }
-  function renderToday() {
-    const el = $("today");
-    const now = new Date();
-    const age = moonAge(now);
-    const lit = Math.round((1 - Math.cos(2 * Math.PI * age)) / 2 * 100);
-    const moonLine = `${phaseIcon(age)} <strong>${phaseName(age)}</strong>, ${lit}% lit`;
-    const info = sunInfo(now);
-    let sunLine;
-    if (!info) sunLine = "Save a region to see sunrise and sunset.";
-    else if (info.polar) sunLine = "Polar day or night at this location today.";
-    else sunLine = `Sunrise <strong>${info.rise}</strong> · Sunset <strong>${info.set}</strong><br>Day length ${info.dayLen}`;
-    el.innerHTML = `${moonLine}<br>${sunLine}`;
-  }
-
-  function renderUpcoming() {
-    const items = [];
-    const now = new Date();
-    const horizon = new Date(now.getTime() + 120 * 86400000);
-    // Full moons
-    for (let t = new Date(now.getFullYear(), now.getMonth(), now.getDate()); t < horizon; t = new Date(t.getTime() + 86400000)) {
-      const nx = new Date(t.getTime() + 86400000);
-      if (isFullMoonDay(t, nx)) items.push({ date: t, label: fullMoonName(t) + " (full moon)" });
-    }
-    // Sabbats
-    [now.getFullYear(), now.getFullYear() + 1].forEach(y => {
-      sabbatsForYear(y).forEach(s => {
-        if (s.date >= now && s.date < horizon) items.push({ date: s.date, label: "✦ " + s.name });
-      });
-    });
-    items.sort((a, b) => a.date - b.date);
-    $("upcoming").innerHTML = items.slice(0, 12).map(i =>
-      `<li><span>${i.label}</span><span class="d">${i.date.toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span></li>`
-    ).join("") || `<li><span>Nothing in the next 4 months.</span></li>`;
-  }
-
-  function renderAll() {
-    renderCalendar();
-    renderToday();
-    renderUpcoming();
-    const u = state.updated ? new Date(state.updated).toLocaleString() : null;
-    const offline = navigator.onLine === false;
-    $("updated").textContent = state.region
-      ? `${state.region.name || "Region"} · ${u ? (offline ? "offline, forecast from " : "updated ") + u : "weather not yet fetched"}`
-      : "Not yet updated for a region.";
-  }
-
-  // ---------- Actions ----------
-  function readRegionForm() {
-    const lat = parseFloat($("lat").value), lon = parseFloat($("lon").value);
-    if (!isFinite(lat) || lat < -90 || lat > 90) throw new Error("Enter a latitude between -90 and 90.");
-    if (!isFinite(lon) || lon < -180 || lon > 180) throw new Error("Enter a longitude between -180 and 180.");
-    return {
-      name: $("regionName").value.trim(),
-      lat, lon,
-      tz: $("tz").value.trim() || Intl.DateTimeFormat().resolvedOptions().timeZone
-    };
-  }
-
-  async function updateWeather() {
-    if (!state.region) throw new Error("Save a region first.");
-    setStatus("Fetching weather…");
-    state.weather = await fetchWeather(state.region.lat, state.region.lon, state.region.tz);
-    state.updated = new Date().toISOString();
-    save(state);
-    setStatus("Weather updated.");
-    renderAll();
-  }
-
-  // ---------- Sync via a private GitHub Gist ----------
-  // Only region and tradition sync; forecasts are fetched on each device when online.
-  const SYNC_KEY = "almanac.sync";
-  const SYNC_FILE = "almanac-settings.json";
-  const syncCfg = () => { try { return JSON.parse(localStorage.getItem(SYNC_KEY)) || {}; } catch { return {}; } };
-  const saveSyncCfg = (c) => { try { localStorage.setItem(SYNC_KEY, JSON.stringify(c)); } catch {} };
-  const syncStatusEl = () => $("syncStatus");
-  const setSyncStatus = (msg) => { const el = syncStatusEl(); if (el) el.textContent = msg; };
-
-  async function gh(path, opts = {}) {
-    const cfg = syncCfg();
-    const res = await fetch("https://api.github.com" + path, {
-      ...opts,
-      headers: {
-        "Accept": "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-        "Authorization": "Bearer " + cfg.token,
-        ...(opts.body ? { "Content-Type": "application/json" } : {})
-      }
-    });
-    if (res.status === 401) throw new Error("GitHub token was rejected. Reconnect sync.");
-    if (!res.ok) throw new Error("GitHub returned " + res.status);
-    return res.json();
-  }
-
-  // Mark local settings as changed and try to push them now.
-  function touchSettings() {
-    state.settingsUpdated = Date.now();
-    save(state);
-    const cfg = syncCfg();
-    if (cfg.token) { cfg.dirty = true; saveSyncCfg(cfg); syncNow(); }
-  }
-
-  async function pushSettings() {
-    const cfg = syncCfg();
-    const body = JSON.stringify({
-      files: { [SYNC_FILE]: { content: JSON.stringify({
-        region: state.region || null,
-        tradition: state.tradition || null,
-        updated: state.settingsUpdated || 0
-      }, null, 2) } },
-      ...(cfg.gistId ? {} : { description: "Almanac settings (private)", public: false })
-    });
-    const j = cfg.gistId
-      ? await gh("/gists/" + cfg.gistId, { method: "PATCH", body })
-      : await gh("/gists", { method: "POST", body });
-    cfg.gistId = j.id;
-    cfg.dirty = false;
-    cfg.lastSyncedAt = Date.now();
-    saveSyncCfg(cfg);
-  }
-
-  async function pullSettings() {
-    const cfg = syncCfg();
-    const j = await gh("/gists/" + cfg.gistId);
-    const file = j.files && j.files[SYNC_FILE];
-    if (!file || !file.content) return false;
-    const remote = JSON.parse(file.content);
-    if ((remote.updated || 0) > (state.settingsUpdated || 0)) {
-      state.region = remote.region || state.region;
-      state.tradition = remote.tradition || state.tradition;
-      state.settingsUpdated = remote.updated;
-      save(state);
-      fillForm();
-      renderAll();
-      return true;
-    }
-    return false;
-  }
-
-  async function syncNow() {
-    const cfg = syncCfg();
-    if (!cfg.token || navigator.onLine === false) return;
-    try {
-      if (cfg.gistId) {
-        const pulled = await pullSettings();
-        if (!pulled) {
-          const c = syncCfg();
-          if (c.dirty || !c.lastSyncedAt) await pushSettings();
+          }
+          $("cal").innerHTML = html;
         }
-      } else {
-        await pushSettings();
-      }
-      setSyncStatus("Synced " + new Date().toLocaleTimeString());
-    } catch (e) {
-      setSyncStatus("Sync paused: " + e.message);
-    }
-  }
 
-  $("connectSync").addEventListener("click", async () => {
-    const token = $("syncToken").value.trim();
-    if (!token) { setSyncStatus("Paste a GitHub token first."); return; }
-    const cfg = syncCfg();
-    cfg.token = token;
-    cfg.gistId = cfg.gistId || null;
-    saveSyncCfg(cfg);
-    $("syncToken").value = "";
-    try {
-      const existing = cfg.gistId || findSyncGist(await gh("/gists?per_page=100"));
-      if (existing) { cfg.gistId = existing; saveSyncCfg(cfg); }
-      await syncNow();
-      renderSyncPanel();
-    } catch (e) {
-      setSyncStatus(e.message);
-    }
-  });
-  function findSyncGist(list) {
-    const g = (list || []).find(x => x.description === "Almanac settings (private)" && x.files && x.files[SYNC_FILE]);
-    return g ? g.id : null;
-  }
-  $("disconnectSync").addEventListener("click", () => {
-    localStorage.removeItem(SYNC_KEY);
-    renderSyncPanel();
-    setSyncStatus("Sync disconnected on this device.");
-  });
-  $("syncNowBtn").addEventListener("click", syncNow);
+        function phaseName(age) {
+          const names = [
+            "New moon",
+            "Waxing crescent",
+            "First quarter",
+            "Waxing gibbous",
+            "Full moon",
+            "Waning gibbous",
+            "Last quarter",
+            "Waning crescent",
+          ];
+          return names[Math.floor(((age + 1 / 16) % 1) * 8)];
+        }
+        function renderToday() {
+          const el = $("today");
+          const now = new Date();
+          const age = moonAge(now);
+          const lit = Math.round(((1 - Math.cos(2 * Math.PI * age)) / 2) * 100);
+          const moonLine = `${phaseIcon(age)} <strong>${phaseName(age)}</strong>, ${lit}% lit`;
+          const info = sunInfo(now);
+          let sunLine;
+          if (!info) sunLine = "Save a region to see sunrise and sunset.";
+          else if (info.polar)
+            sunLine = "Polar day or night at this location today.";
+          else
+            sunLine = `Sunrise <strong>${info.rise}</strong> · Sunset <strong>${info.set}</strong><br>Day length ${info.dayLen}`;
+          el.innerHTML = `${moonLine}<br>${sunLine}`;
+        }
 
-  function renderSyncPanel() {
-    const cfg = syncCfg();
-    $("syncConnected").style.display = cfg.token ? "block" : "none";
-    $("syncSetup").style.display = cfg.token ? "none" : "block";
-    if (cfg.token) setSyncStatus(cfg.lastSyncedAt ? "Last synced " + new Date(cfg.lastSyncedAt).toLocaleString() : "Not synced yet.");
-  }
+        function renderUpcoming() {
+          const items = [];
+          const now = new Date();
+          const horizon = new Date(now.getTime() + 120 * 86400000);
+          // Full moons
+          for (
+            let t = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            t < horizon;
+            t = new Date(t.getTime() + 86400000)
+          ) {
+            const nx = new Date(t.getTime() + 86400000);
+            if (isFullMoonDay(t, nx))
+              items.push({ date: t, label: fullMoonName(t) + " (full moon)" });
+          }
+          // Sabbats
+          [now.getFullYear(), now.getFullYear() + 1].forEach((y) => {
+            sabbatsForYear(y).forEach((s) => {
+              if (s.date >= now && s.date < horizon)
+                items.push({ date: s.date, label: "✦ " + s.name });
+            });
+          });
+          items.sort((a, b) => a.date - b.date);
+          $("upcoming").innerHTML =
+            items
+              .slice(0, 12)
+              .map(
+                (i) =>
+                  `<li><span>${i.label}</span><span class="d">${i.date.toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span></li>`,
+              )
+              .join("") ||
+            `<li><span>Nothing in the next 4 months.</span></li>`;
+        }
 
-  $("saveRegion").addEventListener("click", async () => {
-    try {
-      state.region = readRegionForm();
-      touchSettings();
-      await updateWeather();
-    } catch (e) {
-      setStatus(e.message);
-    }
-  });
-  $("updateWeather").addEventListener("click", async () => {
-    try { await updateWeather(); } catch (e) { setStatus(e.message); }
-  });
-  $("prev").addEventListener("click", () => { view = new Date(view.getFullYear(), view.getMonth() - 1, 1); renderCalendar(); });
-  $("next").addEventListener("click", () => { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); renderCalendar(); });
-  $("exportData").addEventListener("click", () => {
-    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "almanac-data.json";
-    a.click();
-  });
+        function renderAll() {
+          renderCalendar();
+          renderToday();
+          renderUpcoming();
+          const u = state.updated
+            ? new Date(state.updated).toLocaleString()
+            : null;
+          const offline = navigator.onLine === false;
+          $("updated").textContent = state.region
+            ? `${state.region.name || "Region"} · ${u ? (offline ? "offline, forecast from " : "updated ") + u : "weather not yet fetched"}`
+            : "Not yet updated for a region.";
+        }
 
-  fillForm();
-  renderAll();
-  renderSyncPanel();
+        // ---------- Actions ----------
+        function readRegionForm() {
+          const lat = parseFloat($("lat").value),
+            lon = parseFloat($("lon").value);
+          if (!isFinite(lat) || lat < -90 || lat > 90)
+            throw new Error("Enter a latitude between -90 and 90.");
+          if (!isFinite(lon) || lon < -180 || lon > 180)
+            throw new Error("Enter a longitude between -180 and 180.");
+          return {
+            name: $("regionName").value.trim(),
+            lat,
+            lon,
+            tz:
+              $("tz").value.trim() ||
+              Intl.DateTimeFormat().resolvedOptions().timeZone,
+          };
+        }
 
-  // Update when connected: sync settings and refresh the forecast if it's more than 3 hours old.
-  async function refreshWhenOnline() {
-    if (navigator.onLine === false) return;
-    await syncNow();
-    const stale = !state.updated || (Date.now() - new Date(state.updated).getTime()) > 3 * 3600000;
-    if (state.region && stale) {
-      try { await updateWeather(); } catch {}
-    }
-  }
-  window.addEventListener("online", refreshWhenOnline);
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") refreshWhenOnline();
-  });
-  refreshWhenOnline();
+        async function updateWeather() {
+          if (!state.region) throw new Error("Save a region first.");
+          setStatus("Fetching weather…");
+          state.weather = await fetchWeather(
+            state.region.lat,
+            state.region.lon,
+            state.region.tz,
+          );
+          state.updated = new Date().toISOString();
+          save(state);
+          setStatus("Weather updated.");
+          renderAll();
+        }
 
-  // Offline support: register the service worker where supported (needs http(s) or localhost).
-  if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
-    navigator.serviceWorker.register("sw.js").catch(() => {});
-  }
-})();
-</script>
-</body>
+        // ---------- Sync via a private GitHub Gist ----------
+        // Only region and tradition sync; forecasts are fetched on each device when online.
+        const SYNC_KEY = "almanac.sync";
+        const SYNC_FILE = "almanac-settings.json";
+        const syncCfg = () => {
+          try {
+            return JSON.parse(localStorage.getItem(SYNC_KEY)) || {};
+          } catch {
+            return {};
+          }
+        };
+        const saveSyncCfg = (c) => {
+          try {
+            localStorage.setItem(SYNC_KEY, JSON.stringify(c));
+          } catch {}
+        };
+        const syncStatusEl = () => $("syncStatus");
+        const setSyncStatus = (msg) => {
+          const el = syncStatusEl();
+          if (el) el.textContent = msg;
+        };
+
+        async function gh(path, opts = {}) {
+          const cfg = syncCfg();
+          const res = await fetch("https://api.github.com" + path, {
+            ...opts,
+            headers: {
+              Accept: "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
+              Authorization: "Bearer " + cfg.token,
+              ...(opts.body ? { "Content-Type": "application/json" } : {}),
+            },
+          });
+          if (res.status === 401)
+            throw new Error("GitHub token was rejected. Reconnect sync.");
+          if (!res.ok) throw new Error("GitHub returned " + res.status);
+          return res.json();
+        }
+
+        // Mark local settings as changed and try to push them now.
+        function touchSettings() {
+          state.settingsUpdated = Date.now();
+          save(state);
+          const cfg = syncCfg();
+          if (cfg.token) {
+            cfg.dirty = true;
+            saveSyncCfg(cfg);
+            syncNow();
+          }
+        }
+
+        async function pushSettings() {
+          const cfg = syncCfg();
+          const body = JSON.stringify({
+            files: {
+              [SYNC_FILE]: {
+                content: JSON.stringify(
+                  {
+                    region: state.region || null,
+                    tradition: state.tradition || null,
+                    updated: state.settingsUpdated || 0,
+                  },
+                  null,
+                  2,
+                ),
+              },
+            },
+            ...(cfg.gistId
+              ? {}
+              : { description: "Almanac settings (private)", public: false }),
+          });
+          const j = cfg.gistId
+            ? await gh("/gists/" + cfg.gistId, { method: "PATCH", body })
+            : await gh("/gists", { method: "POST", body });
+          cfg.gistId = j.id;
+          cfg.dirty = false;
+          cfg.lastSyncedAt = Date.now();
+          saveSyncCfg(cfg);
+        }
+
+        async function pullSettings() {
+          const cfg = syncCfg();
+          const j = await gh("/gists/" + cfg.gistId);
+          const file = j.files && j.files[SYNC_FILE];
+          if (!file || !file.content) return false;
+          const remote = JSON.parse(file.content);
+          if ((remote.updated || 0) > (state.settingsUpdated || 0)) {
+            state.region = remote.region || state.region;
+            state.tradition = remote.tradition || state.tradition;
+            state.settingsUpdated = remote.updated;
+            save(state);
+            fillForm();
+            renderAll();
+            return true;
+          }
+          return false;
+        }
+
+        async function syncNow() {
+          const cfg = syncCfg();
+          if (!cfg.token || navigator.onLine === false) return;
+          try {
+            if (cfg.gistId) {
+              const pulled = await pullSettings();
+              if (!pulled) {
+                const c = syncCfg();
+                if (c.dirty || !c.lastSyncedAt) await pushSettings();
+              }
+            } else {
+              await pushSettings();
+            }
+            setSyncStatus("Synced " + new Date().toLocaleTimeString());
+          } catch (e) {
+            setSyncStatus("Sync paused: " + e.message);
+          }
+        }
+
+        $("connectSync").addEventListener("click", async () => {
+          const token = $("syncToken").value.trim();
+          if (!token) {
+            setSyncStatus("Paste a GitHub token first.");
+            return;
+          }
+          const cfg = syncCfg();
+          cfg.token = token;
+          cfg.gistId = cfg.gistId || null;
+          saveSyncCfg(cfg);
+          $("syncToken").value = "";
+          try {
+            const existing =
+              cfg.gistId || findSyncGist(await gh("/gists?per_page=100"));
+            if (existing) {
+              cfg.gistId = existing;
+              saveSyncCfg(cfg);
+            }
+            await syncNow();
+            renderSyncPanel();
+          } catch (e) {
+            setSyncStatus(e.message);
+          }
+        });
+        function findSyncGist(list) {
+          const g = (list || []).find(
+            (x) =>
+              x.description === "Almanac settings (private)" &&
+              x.files &&
+              x.files[SYNC_FILE],
+          );
+          return g ? g.id : null;
+        }
+        $("disconnectSync").addEventListener("click", () => {
+          localStorage.removeItem(SYNC_KEY);
+          renderSyncPanel();
+          setSyncStatus("Sync disconnected on this device.");
+        });
+        $("syncNowBtn").addEventListener("click", syncNow);
+
+        function renderSyncPanel() {
+          const cfg = syncCfg();
+          $("syncConnected").style.display = cfg.token ? "block" : "none";
+          $("syncSetup").style.display = cfg.token ? "none" : "block";
+          if (cfg.token)
+            setSyncStatus(
+              cfg.lastSyncedAt
+                ? "Last synced " + new Date(cfg.lastSyncedAt).toLocaleString()
+                : "Not synced yet.",
+            );
+        }
+
+        $("saveRegion").addEventListener("click", async () => {
+          try {
+            state.region = readRegionForm();
+            touchSettings();
+            await updateWeather();
+          } catch (e) {
+            setStatus(e.message);
+          }
+        });
+        $("updateWeather").addEventListener("click", async () => {
+          try {
+            await updateWeather();
+          } catch (e) {
+            setStatus(e.message);
+          }
+        });
+        $("prev").addEventListener("click", () => {
+          view = new Date(view.getFullYear(), view.getMonth() - 1, 1);
+          renderCalendar();
+        });
+        $("next").addEventListener("click", () => {
+          view = new Date(view.getFullYear(), view.getMonth() + 1, 1);
+          renderCalendar();
+        });
+        $("exportData").addEventListener("click", () => {
+          const blob = new Blob([JSON.stringify(state, null, 2)], {
+            type: "application/json",
+          });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "almanac-data.json";
+          a.click();
+        });
+
+        fillForm();
+        renderAll();
+        renderSyncPanel();
+
+        // Update when connected: sync settings and refresh the forecast if it's more than 3 hours old.
+        async function refreshWhenOnline() {
+          if (navigator.onLine === false) return;
+          await syncNow();
+          const stale =
+            !state.updated ||
+            Date.now() - new Date(state.updated).getTime() > 3 * 3600000;
+          if (state.region && stale) {
+            try {
+              await updateWeather();
+            } catch {}
+          }
+        }
+        window.addEventListener("online", refreshWhenOnline);
+        document.addEventListener("visibilitychange", () => {
+          if (document.visibilityState === "visible") refreshWhenOnline();
+        });
+        refreshWhenOnline();
+
+        // Offline support: register the service worker where supported (needs http(s) or localhost).
+        if (
+          "serviceWorker" in navigator &&
+          location.protocol.startsWith("http")
+        ) {
+          navigator.serviceWorker.register("sw.js").catch(() => {});
+        }
+      })();
+    </script>
+  </body>
 </html>
