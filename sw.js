@@ -1,7 +1,7 @@
 // Service worker: makes the app work offline after the first visit.
-// App shell (HTML, manifest, icon) is cached and served first; weather requests go to the
+// App shell (HTML, manifest, icon) is fetched fresh when online and saved for offline use; weather requests go to the
 // network, and the app falls back to the forecast saved in localStorage when offline.
-const CACHE = "almanac-v8";
+const CACHE = "almanac-v9";
 const SHELL = [
   "./",
   "./index.html",
@@ -36,21 +36,19 @@ self.addEventListener("fetch", (event) => {
   // Weather API: network only; the page handles failure with the saved forecast.
   if (url.hostname === "api.open-meteo.com") return;
 
-  // App shell: cache first, refresh the cache in the background.
+  // App shell: network first, so a connected browser always gets the newest page.
+  // Falls back to the saved copy when offline.
   if (url.origin === self.location.origin) {
     event.respondWith(
-      caches.match(event.request).then((cached) => {
-        const network = fetch(event.request)
-          .then((res) => {
-            if (res && res.ok) {
-              const copy = res.clone();
-              caches.open(CACHE).then((c) => c.put(event.request, copy));
-            }
-            return res;
-          })
-          .catch(() => cached);
-        return cached || network;
-      }),
+      fetch(event.request)
+        .then((res) => {
+          if (res && res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(event.request, copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match(event.request)),
     );
   }
 });
