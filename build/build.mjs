@@ -51,6 +51,7 @@ await writeFile(join(out, "sw.js"), swMin.code);
 // 3. Static assets
 await copyFile(join(root, "manifest.json"), join(out, "manifest.json"));
 await copyFile(join(root, "icon.svg"), join(out, "icon.svg"));
+await copyFile(join(root, "data", "us-zips.json"), join(out, "us-zips.json"));
 
 // 4. Menus: combine menus/*.json into one file in wheel order, for the app and for offline use.
 const menuDir = join(root, "menus");
