@@ -1,7 +1,7 @@
 // Service worker: makes the app work offline after the first visit.
 // App shell (HTML, manifest, icon) is cached and served first; weather requests go to the
 // network, and the app falls back to the forecast saved in localStorage when offline.
-const CACHE = "almanac-v4";
+const CACHE = "almanac-v5";
 const SHELL = [
   "./",
   "./index.html",
