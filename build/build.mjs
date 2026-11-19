@@ -64,6 +64,25 @@ const menuJson = JSON.stringify({ festivals: menus }, null, 2);
 await writeFile(join(root, "menus.json"), menuJson + "\n");
 await writeFile(join(out, "menus.json"), menuJson);
 
+// 4b. Garden: zone reference plus one pack per region, combined into garden.json.
+const gardenDir = join(root, "data", "garden");
+const packFiles = (await readdir(gardenDir)).filter((f) => f.endsWith(".json"));
+const packs = [];
+for (const f of packFiles) {
+  packs.push(JSON.parse(await readFile(join(gardenDir, f), "utf8")));
+}
+packs.sort((a, b) => a.name.localeCompare(b.name));
+const zones = JSON.parse(
+  await readFile(join(root, "data", "zones.json"), "utf8"),
+);
+const gardenJson = JSON.stringify(
+  { zones: zones.zones, zone_note: zones.source_note, packs },
+  null,
+  2,
+);
+await writeFile(join(root, "garden.json"), gardenJson + "\n");
+await writeFile(join(out, "garden.json"), gardenJson);
+
 // 5. Public README (written for users, not for development)
 await copyFile(join(root, "build", "public-README.md"), join(out, "README.md"));
 

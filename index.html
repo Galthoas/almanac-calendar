@@ -293,6 +293,8 @@
           <label for="tradition">Festival tradition</label>
           <select id="tradition"></select>
           <div class="small" id="traditionNote" style="margin-top: 4px"></div>
+          <label for="garden">Garden pack</label>
+          <select id="garden"></select>
           <label for="style">Look</label>
           <select id="style"></select>
           <button id="saveRegion">Save region &amp; update data</button>
@@ -362,6 +364,20 @@
           <label for="menuSelect">Festival</label>
           <select id="menuSelect"></select>
           <div id="menuBody"></div>
+        </div>
+
+        <div
+          class="panel"
+          id="gardenPanel"
+          style="margin-top: 20px; display: none"
+        >
+          <h2>Garden: planting and wild edibles</h2>
+          <p class="small">
+            Planting windows are general starting points, not a substitute for
+            your extension calendar. Never eat a wild plant you haven't
+            positively identified.
+          </p>
+          <div id="gardenBody"></div>
         </div>
 
         <div class="panel" style="margin-top: 20px">
@@ -1003,6 +1019,101 @@
             .join("");
         }
 
+        // ---------- Garden packs (planting windows and wild edibles; data from garden.json) ----------
+        let gardenData = null;
+        const MONTH_DAY = (d) =>
+          d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+        function addDays(d, n) {
+          const x = new Date(d);
+          x.setDate(x.getDate() + n);
+          return x;
+        }
+        function gardenPack() {
+          return gardenData && state.garden
+            ? gardenData.packs.find((p) => p.id === state.garden)
+            : null;
+        }
+        // Frost dates for a year: the station base, shifted for elevation (later spring, earlier fall).
+        function gardenDates(pack, year) {
+          const f = pack.frost;
+          const [sm, sd] = f.base_last_spring_frost.split("-").map(Number);
+          const [fm, fd] = f.base_first_fall_frost.split("-").map(Number);
+          const s = f.elevation_shift_days || 0;
+          return {
+            last: new Date(year, sm - 1, sd + s),
+            first: new Date(year, fm - 1, fd - s),
+          };
+        }
+        function renderGarden() {
+          const panel = $("gardenPanel");
+          const pack = gardenPack();
+          if (!pack) {
+            panel.style.display = "none";
+            return;
+          }
+          panel.style.display = "block";
+          const year = new Date().getFullYear();
+          const { last, first } = gardenDates(pack, year);
+          const season = Math.round((first - last) / 86400000);
+          const plant = pack.planting
+            .map((c) => {
+              const from = addDays(last, c.from_last_frost_days[0]);
+              const to = addDays(last, c.from_last_frost_days[1]);
+              const harvest = addDays(to, c.harvest_days);
+              return `<li><strong>${esc(c.crop)}</strong>: plant ${MONTH_DAY(from)} to ${MONTH_DAY(to)}, harvest about ${MONTH_DAY(harvest)}<br><span class="small">${esc(c.note)}</span></li>`;
+            })
+            .join("");
+          const edibles = pack.wild_edibles
+            .map(
+              (w) => `<details class="herb">
+          <summary>${esc(w.name)}</summary>
+          <p><strong>Lookalike:</strong> ${esc(w.lookalike)}</p>
+          <p>${esc(w.warning)}</p>
+        </details>`,
+            )
+            .join("");
+          const rules = pack.wild_edible_rules
+            .map((r) => `<li>${esc(r)}</li>`)
+            .join("");
+          $("gardenBody").innerHTML = `
+            <div class="menu-body">
+              <p><strong>${esc(pack.name)}</strong></p>
+              <p class="small">${esc(pack.zone_note)}</p>
+              <div class="menu-h">Frost dates for ${year}</div>
+              <p>Last spring frost about <strong>${MONTH_DAY(last)}</strong>. First fall frost about <strong>${MONTH_DAY(first)}</strong>. Growing season about ${season} days.</p>
+              <p class="small">Base: ${esc(pack.frost.base_source)}. Shifted ${esc(pack.frost.elevation_shift_days)} days for elevation.</p>
+              <div class="menu-h">Planting windows</div>
+              <ul>${plant}</ul>
+              <p class="small">${esc(pack.planting_note)}</p>
+              <div class="menu-h">Wild edibles</div>
+              ${edibles}
+              <ul>${rules}</ul>
+              <p class="small">${esc(pack.extension.name)}: ${esc(pack.extension.note)}</p>
+            </div>`;
+        }
+        async function loadGarden() {
+          try {
+            const res = await fetch("garden.json");
+            if (res.ok) gardenData = await res.json();
+          } catch {}
+          if (gardenData) {
+            $("garden").innerHTML =
+              `<option value="">None</option>` +
+              gardenData.packs
+                .map(
+                  (p) => `<option value="${esc(p.id)}">${esc(p.name)}</option>`,
+                )
+                .join("");
+            $("garden").value = state.garden || "";
+          }
+          renderGarden();
+        }
+        $("garden").addEventListener("change", (e) => {
+          state.garden = e.target.value || null;
+          save(state);
+          renderGarden();
+        });
+
         // ---------- Festival menus (kitchen look; data from menus.json) ----------
         let menuData = null;
         let menuChoice = null;
@@ -1100,6 +1211,7 @@
         function renderAll() {
           renderHerbs();
           renderMenus();
+          renderGarden();
           renderCalendar();
           renderToday();
           renderUpcoming();
@@ -1353,6 +1465,7 @@
         renderAll();
         renderSyncPanel();
         loadMenus();
+        loadGarden();
 
         // Update when connected: sync settings and refresh the forecast if it's more than 3 hours old.
         async function refreshWhenOnline() {

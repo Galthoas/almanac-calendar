@@ -1,0 +1,18 @@
+{
+  "source_note": "USDA Plant Hardiness Zone Map (2023 edition). Each zone covers a 10 F band of average annual extreme minimum winter temperature; a and b sub-zones split each band in half. Zones describe winter cold only. Frost dates vary within a zone, so each garden pack stores its own frost data.",
+  "zones": [
+    { "zone": "1", "min_f": -60, "max_f": -50 },
+    { "zone": "2", "min_f": -50, "max_f": -40 },
+    { "zone": "3", "min_f": -40, "max_f": -30 },
+    { "zone": "4", "min_f": -30, "max_f": -20 },
+    { "zone": "5", "min_f": -20, "max_f": -10 },
+    { "zone": "6", "min_f": -10, "max_f": 0 },
+    { "zone": "7", "min_f": 0, "max_f": 10 },
+    { "zone": "8", "min_f": 10, "max_f": 20 },
+    { "zone": "9", "min_f": 20, "max_f": 30 },
+    { "zone": "10", "min_f": 30, "max_f": 40 },
+    { "zone": "11", "min_f": 40, "max_f": 50 },
+    { "zone": "12", "min_f": 50, "max_f": 60 },
+    { "zone": "13", "min_f": 60, "max_f": 70 }
+  ]
+}
