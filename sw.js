@@ -1,8 +1,14 @@
 // Service worker: makes the app work offline after the first visit.
 // App shell (HTML, manifest, icon) is cached and served first; weather requests go to the
 // network, and the app falls back to the forecast saved in localStorage when offline.
-const CACHE = "almanac-v2";
-const SHELL = ["./", "./index.html", "./manifest.json", "./icon.svg"];
+const CACHE = "almanac-v3";
+const SHELL = [
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./icon.svg",
+  "./menus.json",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)));

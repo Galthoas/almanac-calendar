@@ -1,0 +1,66 @@
+{
+  "id": "mabon",
+  "name": "Mabon",
+  "order": 6,
+  "date_note": "Around September 22 (the autumn equinox). The exact day shifts from year to year.",
+  "history": "Mabon is a modern name for the autumn equinox, taken from Welsh myth, and was popularised in the 1970s. Historic harvest feasts were held in autumn across Europe, but there is no single documented Mabon menu. Modern lists centre on apples, grains, squash, root vegetables and cider.",
+  "confidence": "The name and festival are modern. The foods are seasonal harvest foods rather than an official menu.",
+  "sources": [
+    {
+      "title": "History.co.uk: autumn equinox traditions",
+      "url": "https://www.history.co.uk/articles/autumn-equinox-pagan-traditional-celebrations"
+    },
+    {
+      "title": "Pagan Grimoire: Mabon foods and recipes",
+      "url": "https://www.pagangrimoire.com/mabon-recipes-fall-equinox/"
+    },
+    {
+      "title": "The Wheel and Sacred Time: Mabon correspondences",
+      "url": "https://grimoire-3sj.pages.dev/encyclopedia/mabon-correspondences"
+    }
+  ],
+  "dishes": [
+    {
+      "name": "Harvest squash and apple soup",
+      "serves": 6,
+      "ritual_note": "Make it with what is local and in season, and share it with the people at the table.",
+      "ingredients": [
+        "1 small winter squash, about 1 kg, peeled and cubed",
+        "2 apples, peeled and chopped",
+        "1 onion, chopped",
+        "2 tbsp olive oil",
+        "1 tsp ground cinnamon",
+        "1 litre vegetable stock",
+        "Salt and black pepper",
+        "Cream or yoghurt, to serve (optional)"
+      ],
+      "steps": [
+        "Heat the oven to 200 C (180 C fan). Toss the squash in half the oil and roast for 25 minutes, until soft at the edges.",
+        "Soften the onion in the rest of the oil in a large pan for 5 minutes. Add the apples and cinnamon and cook for 3 minutes more.",
+        "Add the roasted squash and the stock. Simmer for 10 minutes.",
+        "Blend until smooth. Season to taste and serve with a swirl of cream or yoghurt."
+      ],
+      "safety": "Blend in batches and leave the lid slightly open so the steam can escape."
+    },
+    {
+      "name": "Spiced apple cider compote",
+      "serves": 6,
+      "ritual_note": "Apples were split between eating and drinking in many harvests. Serve this over bread or yoghurt.",
+      "ingredients": [
+        "4 apples, cored and sliced",
+        "250 ml apple cider",
+        "3 tbsp brown sugar",
+        "1 cinnamon stick",
+        "2 cloves",
+        "1 tsp lemon juice"
+      ],
+      "steps": [
+        "Put the cider, sugar, cinnamon and cloves in a saucepan. Bring to a simmer.",
+        "Add the apples and cook gently for 12 to 15 minutes, until the apples are soft but still hold their shape.",
+        "Stir in the lemon juice. Remove the cinnamon and cloves, then cool.",
+        "Serve warm or chilled."
+      ],
+      "safety": "Keep refrigerated and use within 4 days."
+    }
+  ]
+}

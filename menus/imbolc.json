@@ -1,0 +1,61 @@
+{
+  "id": "imbolc",
+  "name": "Imbolc (Brigid's Day)",
+  "order": 1,
+  "date_note": "February 1. Many traditions also mark it on the evening before.",
+  "history": "In Ireland and Scotland, a festive supper on Brigid's Day usually centred on potatoes and freshly churned butter, with colcannon often added. Fresh butter and bannocks or oatcakes also appear in folk accounts. Modern Imbolc observances draw on these customs.",
+  "confidence": "Documented regional customs (Ireland, Scotland). Modern Imbolc menus are reconstructions.",
+  "sources": [
+    {
+      "title": "National Museum of Ireland: St Brigid's Day",
+      "url": "https://museum.ie/en-IE/News/St-Brigids-Day-a-weaving-tradition-of-Celtic-ritu"
+    },
+    {
+      "title": "RTE Brainstorm: St Brigid's Day food and folklore",
+      "url": "https://www.rte.ie/brainstorm/2024/0129/1429181-st-brigids-day-food-folklore-milk-poundies-boxty-colcannon-champ-rice-pudding"
+    },
+    {
+      "title": "Herbology News: Scottish oatcakes and bannocks (The Scots Kitchen)",
+      "url": "https://issuu.com/herbologynews1/docs/herbologynews-feb22/s/14713764"
+    }
+  ],
+  "dishes": [
+    {
+      "name": "Brigid's butter with new potatoes",
+      "serves": 4,
+      "ritual_note": "Churning butter by hand was a traditional task on this day. Making it at home is a good way to mark the day.",
+      "ingredients": [
+        "600 g small potatoes, scrubbed",
+        "300 ml double cream, cold",
+        "1 pinch flaky salt",
+        "Ice water, for rinsing"
+      ],
+      "steps": [
+        "Boil the potatoes in salted water for 15 to 20 minutes, until a knife slides in easily. Drain and keep warm.",
+        "Whip the cream in a bowl with an electric mixer on medium speed. After about 5 minutes it turns grainy, then separates into solid butter and liquid buttermilk.",
+        "Pour off the buttermilk. Gather the butter and rinse it under cold water, pressing it with a spoon until the water runs clear.",
+        "Work in the salt and shape the butter. Serve spooned over the warm potatoes."
+      ],
+      "safety": "Keep the buttermilk for baking if you like. Store the butter in the fridge and use within a week."
+    },
+    {
+      "name": "Brigid's oatcakes",
+      "serves": 6,
+      "ritual_note": "Oatcakes were a common bannock-style bread across Scotland. A quarter-round was often baked for the festival.",
+      "ingredients": [
+        "200 g medium oatmeal, plus extra for dusting",
+        "1/2 tsp salt",
+        "30 g butter",
+        "90 ml hot water"
+      ],
+      "steps": [
+        "Heat the oven to 180 C (160 C fan).",
+        "Mix the oatmeal and salt in a bowl.",
+        "Melt the butter into the hot water, then stir it into the oatmeal to make a stiff dough.",
+        "Dust a board with oatmeal and roll the dough to about 3 mm thick. Cut into rounds or wedges.",
+        "Bake on a lined tray for 15 to 20 minutes, until the edges curl and the tops are dry."
+      ],
+      "safety": "Cool on a rack. These keep for about 5 days in an airtight tin."
+    }
+  ]
+}

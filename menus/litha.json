@@ -1,0 +1,65 @@
+{
+  "id": "litha",
+  "name": "Litha (Midsummer)",
+  "order": 4,
+  "date_note": "Around June 21 (the summer solstice). Midsummer in Sweden and Finland is observed on the weekend nearest June 24.",
+  "history": "Litha is a modern Wiccan name for the summer solstice. Its name comes from Old English month names, not a documented festival. Midsummer celebrations in Scandinavia are well documented. Their typical foods are new potatoes with dill or chives and sour cream, and pickled herring. Many modern Litha menus borrow from these customs.",
+  "confidence": "The name Litha is not a documented festival. Scandinavian Midsummer foods are well documented.",
+  "sources": [
+    {
+      "title": "Britannica: Midsummer traditions and food",
+      "url": "https://www.britannica.com/print/article/381655"
+    },
+    {
+      "title": "KRDO: traditional Midsummer lunch",
+      "url": "https://krdo.com/?p=1309978"
+    },
+    {
+      "title": "Pagan Grimoire: the history of Litha",
+      "url": "https://www.pagangrimoire.com/litha-celebrate/"
+    }
+  ],
+  "dishes": [
+    {
+      "name": "Dill new potatoes with sour cream",
+      "serves": 6,
+      "ritual_note": "A typical Midsummer side dish in Scandinavia. Serve it at the table in the open air if you can.",
+      "ingredients": [
+        "1 kg small new potatoes, scrubbed",
+        "30 g butter",
+        "2 tbsp chopped fresh dill",
+        "2 tbsp chopped chives",
+        "150 ml sour cream",
+        "Zest of 1/2 lemon",
+        "Salt and black pepper"
+      ],
+      "steps": [
+        "Boil the potatoes in salted water for 12 to 15 minutes, until tender. Drain.",
+        "Return to the pan with the butter and let it melt over the potatoes. Toss with the dill and chives.",
+        "Mix the sour cream with the lemon zest and a pinch of salt and pepper.",
+        "Serve the warm potatoes with a spoonful of the cream on top."
+      ],
+      "safety": "Serve warm. Don't leave the cream out in the heat for long."
+    },
+    {
+      "name": "Honey-thyme lemonade",
+      "serves": 6,
+      "ritual_note": "Steep thyme in honey, as the herb section describes, and share it on the longest day of the year.",
+      "ingredients": [
+        "4 tbsp honey",
+        "3 sprigs fresh thyme",
+        "250 ml hot water",
+        "Juice of 3 lemons",
+        "1 litre cold water",
+        "Ice and lemon slices, to serve"
+      ],
+      "steps": [
+        "Stir the honey into the hot water until dissolved. Add the thyme sprigs and steep for 15 minutes.",
+        "Remove the thyme and let the syrup cool completely.",
+        "Mix the syrup with the lemon juice and cold water. Chill.",
+        "Serve over ice with lemon slices and a fresh thyme sprig."
+      ],
+      "safety": "Keep refrigerated and use within 2 days."
+    }
+  ]
+}

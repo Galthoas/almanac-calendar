@@ -1,0 +1,71 @@
+{
+  "id": "samhain",
+  "name": "Samhain",
+  "order": 7,
+  "date_note": "October 31 to November 1. Some traditions observe it on November 1.",
+  "history": "Irish Samhain foods were built around the late harvest. Colcannon and barmbrack are the best-documented dishes. Folk accounts describe small charms or trinkets hidden in them as fortune-telling. Some sources also note meatless fare on the vigil of All Saints, which is one reason cabbage and potato dishes became common.",
+  "confidence": "Well documented for Ireland. Modern customs are blended with Halloween.",
+  "sources": [
+    {
+      "title": "Irish Central: colcannon and Samhain",
+      "url": "https://www.irishcentral.com/culture/irish-halloween-colcannon"
+    },
+    {
+      "title": "The Journal: Halloween foods and the vigil of All Saints",
+      "url": "https://www.thejournal.ie/article.php?id=4314547"
+    },
+    {
+      "title": "Irish Times: the original Irish Halloween menu",
+      "url": "https://www.irishtimes.com/food/2026/10/30/the-original-irish-halloween-menu-put-down-the-plastic-and-pull-up-a-cabbage/"
+    }
+  ],
+  "dishes": [
+    {
+      "name": "Colcannon",
+      "serves": 6,
+      "ritual_note": "Folk accounts describe small charms hidden in the mash. Skip charms for children and guests who might choke. A simpler custom is to serve a well of butter in the centre.",
+      "ingredients": [
+        "1.5 kg floury potatoes, peeled and quartered",
+        "300 g savoy cabbage or kale, shredded",
+        "1 bunch spring onions, sliced",
+        "240 ml whole milk",
+        "85 g butter, divided",
+        "Salt and black pepper"
+      ],
+      "steps": [
+        "Boil the potatoes in salted water for about 20 minutes, until soft. Drain well.",
+        "Cook the cabbage or kale in a little salted water for 4 to 5 minutes, then drain.",
+        "Warm the milk with the spring onions and 30 g of the butter over low heat for 2 minutes.",
+        "Mash the potatoes with the warm milk mixture. Fold in the greens and season to taste.",
+        "Spoon into a bowl and make a well in the centre. Melt the remaining butter and pour it in."
+      ],
+      "safety": "Let guests know before serving if you hide anything in the dish."
+    },
+    {
+      "name": "Barmbrack (speckled fruit loaf)",
+      "serves": 10,
+      "ritual_note": "Traditional barmbrack hid charms inside. Use slips of paper wrapped in baking parchment and tell the guests first.",
+      "ingredients": [
+        "250 g mixed dried fruit",
+        "150 ml strong black tea, cooled",
+        "350 g strong white flour",
+        "7 g dried yeast",
+        "50 g soft brown sugar",
+        "1 tsp mixed spice",
+        "150 ml warm milk",
+        "1 egg",
+        "40 g butter, melted",
+        "2 tbsp honey, warmed, for glazing"
+      ],
+      "steps": [
+        "Soak the dried fruit in the cold tea overnight, then drain any extra liquid.",
+        "Mix the flour, yeast, sugar and spice. Add the warm milk, egg and melted butter, then knead for 8 minutes into a smooth dough.",
+        "Cover and leave to rise for 1 hour, until doubled.",
+        "Knead the drained fruit into the dough, then shape it into a round and place it in a greased 20 cm tin.",
+        "Cover and prove for 45 minutes. Bake at 180 C for 50 to 60 minutes, until it sounds hollow when tapped.",
+        "Brush with the warm honey while hot and cool on a rack."
+      ],
+      "safety": "Serve sliced and spread with butter, with strong tea, as is traditional."
+    }
+  ]
+}

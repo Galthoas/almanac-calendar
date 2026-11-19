@@ -49,6 +49,26 @@
       :root[data-style="kitchen"] h1::before {
         content: "🥄 ";
       }
+      .menu-h {
+        font-size: 0.95rem;
+        margin: 12px 0 4px;
+        color: var(--accent);
+      }
+      .menu-body {
+        font-size: 0.85rem;
+        line-height: 1.5;
+      }
+      .menu-body ul,
+      .menu-body ol {
+        margin: 4px 0 8px;
+        padding-left: 20px;
+      }
+      .menu-body li {
+        margin-bottom: 3px;
+      }
+      .menu-body a {
+        color: var(--accent);
+      }
       .herb {
         border-bottom: 1px solid var(--line);
         padding: 6px 0;
@@ -327,6 +347,21 @@
             pregnancy.
           </p>
           <div id="herbList"></div>
+        </div>
+
+        <div
+          class="panel"
+          id="menuPanel"
+          style="margin-top: 20px; display: none"
+        >
+          <h2>Festival menus</h2>
+          <p class="small">
+            Historical foods and simple recipes. Recipes are original, and
+            history notes cite sources. Folklore and customs vary by place.
+          </p>
+          <label for="menuSelect">Festival</label>
+          <select id="menuSelect"></select>
+          <div id="menuBody"></div>
         </div>
 
         <div class="panel" style="margin-top: 20px">
@@ -968,8 +1003,103 @@
             .join("");
         }
 
+        // ---------- Festival menus (kitchen look; data from menus.json) ----------
+        let menuData = null;
+        let menuChoice = null;
+        const esc = (s) =>
+          String(s).replace(
+            /[&<>"']/g,
+            (c) =>
+              ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;",
+              })[c],
+          );
+        // The next festival on the calendar, matched to a menu id by name.
+        function nextFestivalId() {
+          const now = new Date();
+          const today = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate(),
+          );
+          let best = null;
+          [now.getFullYear(), now.getFullYear() + 1].forEach((y) => {
+            sabbatsForYear(y).forEach((s) => {
+              if (s.date >= today && (!best || s.date < best.date)) best = s;
+            });
+          });
+          return best ? best.name.toLowerCase() : "imbolc";
+        }
+        async function loadMenus() {
+          try {
+            const res = await fetch("menus.json");
+            if (res.ok) menuData = await res.json();
+          } catch {}
+          renderMenus();
+        }
+        function renderMenus() {
+          const panel = $("menuPanel");
+          if (currentStyle() !== "kitchen" || !menuData) {
+            panel.style.display = "none";
+            return;
+          }
+          panel.style.display = "block";
+          const sel = $("menuSelect");
+          if (!sel.options.length) {
+            sel.innerHTML = menuData.festivals
+              .map(
+                (f) => `<option value="${esc(f.id)}">${esc(f.name)}</option>`,
+              )
+              .join("");
+            menuChoice = nextFestivalId();
+            sel.value = menuChoice;
+            sel.addEventListener("change", () => {
+              menuChoice = sel.value;
+              renderMenus();
+            });
+          }
+          const f =
+            menuData.festivals.find((x) => x.id === menuChoice) ||
+            menuData.festivals[0];
+          const sources = (f.sources || [])
+            .map(
+              (s) =>
+                `<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a></li>`,
+            )
+            .join("");
+          const dishes = (f.dishes || [])
+            .map(
+              (d) => `
+              <details class="herb">
+                <summary>${esc(d.name)} <span class="small">(serves ${esc(d.serves)})</span></summary>
+                <p class="small">${esc(d.ritual_note || "")}</p>
+                <div class="menu-h">Ingredients</div>
+                <ul>${d.ingredients.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>
+                <div class="menu-h">Method</div>
+                <ol>${d.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>
+                ${d.safety ? `<p class="small"><strong>Note:</strong> ${esc(d.safety)}</p>` : ""}
+              </details>`,
+            )
+            .join("");
+          $("menuBody").innerHTML = `
+            <div class="menu-body">
+              <p class="small"><strong>When:</strong> ${esc(f.date_note)}</p>
+              <div class="menu-h">History</div>
+              <p>${esc(f.history)}</p>
+              <p class="small"><em>${esc(f.confidence)}</em></p>
+              ${dishes}
+              <div class="menu-h">Sources</div>
+              <ul>${sources}</ul>
+            </div>`;
+        }
+
         function renderAll() {
           renderHerbs();
+          renderMenus();
           renderCalendar();
           renderToday();
           renderUpcoming();
@@ -1222,6 +1352,7 @@
         fillForm();
         renderAll();
         renderSyncPanel();
+        loadMenus();
 
         // Update when connected: sync settings and refresh the forecast if it's more than 3 hours old.
         async function refreshWhenOnline() {

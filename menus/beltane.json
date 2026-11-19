@@ -1,0 +1,61 @@
+{
+  "id": "beltane",
+  "name": "Beltane",
+  "order": 3,
+  "date_note": "May 1, or the evening before.",
+  "history": "Beltane bannocks were a well-recorded Scottish custom. An oatmeal bannock was baked for the morning, sometimes with an egg and butter glaze, and shared with family. Accounts also describe marking a piece of the bannock with charcoal from the fire. Oatmeal, bread and fresh green food are common themes in modern Beltane menus.",
+  "confidence": "Documented Scottish bannock customs. Specific rituals varied by place.",
+  "sources": [
+    {
+      "title": "TRAC Scotland: Beltane (PDF) with bannock recipe",
+      "url": "https://tracscotland.org/wp-content/uploads/2016/04/Beltane%20_0.pdf"
+    },
+    {
+      "title": "Atlas Obscura: Beltane bannock",
+      "url": "https://www.atlasobscura.com/articles/how-to-make-beltane-bannock-oatcake"
+    },
+    {
+      "title": "Cailleach's Herbarium: Beltuinn bannock",
+      "url": "https://cailleachs-herbarium.com/?p=175"
+    }
+  ],
+  "dishes": [
+    {
+      "name": "Beltane bannock",
+      "serves": 4,
+      "ritual_note": "Traditionally eaten on the morning of Beltane. Break it into pieces and share one with each person present.",
+      "ingredients": [
+        "125 g medium oatmeal, plus extra for dusting",
+        "1/2 tsp salt",
+        "30 g butter",
+        "90 ml hot water",
+        "1 egg, beaten, for glazing"
+      ],
+      "steps": [
+        "Heat the oven to 180 C (160 C fan), or cook on a dry skillet over medium-low heat.",
+        "Mix the oatmeal and salt. Melt the butter into the hot water and stir it into the oatmeal to make a stiff dough.",
+        "Pat into a round about 1 cm thick on an oat-dusted board, and cut into 4 quarters.",
+        "Brush the tops with beaten egg. Bake for 15 to 18 minutes, or cook in the skillet 4 to 5 minutes per side, until golden and firm."
+      ],
+      "safety": "Eat the same day for the best texture."
+    },
+    {
+      "name": "Leek and herb butter",
+      "serves": 6,
+      "ritual_note": "A simple spread for the bannock. Green leek and herbs suit the season.",
+      "ingredients": [
+        "1 small leek, white and light green parts only, finely sliced",
+        "60 g butter",
+        "1 tbsp chopped chives",
+        "1 tbsp chopped parsley",
+        "1/4 tsp salt"
+      ],
+      "steps": [
+        "Melt half the butter in a small pan. Cook the leek gently for 5 minutes, until soft but not browned.",
+        "Cool for 10 minutes, then beat into the remaining softened butter.",
+        "Stir in the chives, parsley and salt. Chill until firm, then bring to room temperature to spread."
+      ],
+      "safety": "Keep refrigerated and use within 3 days."
+    }
+  ]
+}

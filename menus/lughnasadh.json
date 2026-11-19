@@ -1,0 +1,65 @@
+{
+  "id": "lughnasadh",
+  "name": "Lughnasadh / Lammas",
+  "order": 5,
+  "date_note": "August 1. Some traditions observe it on August 5 by the solar calendar.",
+  "history": "Lammas, from the Old English 'hlafmaesse' (loaf mass), was a grain-harvest festival in Anglo-Saxon England. Loaves made from the first harvest were blessed in church. Lughnasadh, the Irish festival named for the god Lugh, celebrated the first harvest with games and gatherings. Bread, grains and berries appear across modern accounts of both.",
+  "confidence": "The loaf tradition is well attested for Lammas. The Irish Lughnasadh menu is partly reconstructed.",
+  "sources": [
+    {
+      "title": "Spooky Isles: Lammas and Lughnasadh",
+      "url": "https://www.spookyisles.com/?p=102648"
+    },
+    {
+      "title": "Victoria Harrison: Lughnasadh and Lammas traditions",
+      "url": "https://victoriaharrison.substack.com/p/lughnasadh-lammas-celebrations"
+    },
+    {
+      "title": "The Gypsy Thread: Lughnasadh and the first harvest",
+      "url": "https://www.thegypsythread.org/lughnasadh-meaning-history-and-the-first-harvest/"
+    }
+  ],
+  "dishes": [
+    {
+      "name": "First-harvest loaf",
+      "serves": 8,
+      "ritual_note": "Bake one loaf to share, the way a Lammas loaf was blessed and shared.",
+      "ingredients": [
+        "500 g strong white flour, plus extra for dusting",
+        "1 tsp salt",
+        "7 g dried yeast",
+        "325 ml warm water",
+        "1 tbsp olive oil"
+      ],
+      "steps": [
+        "Mix the flour, salt and yeast in a large bowl. Add the water and oil, and mix to a shaggy dough.",
+        "Knead on a floured surface for 10 minutes, until smooth and springy.",
+        "Return to the bowl, cover, and leave in a warm place for 1 to 1.5 hours, until doubled.",
+        "Shape into a round or a long loaf. Place on a floured tray, cover and prove for 30 minutes.",
+        "Heat the oven to 220 C (200 C fan). Slash the top with a knife and bake for 30 to 35 minutes, until deep golden and hollow when tapped."
+      ],
+      "safety": "Cool on a rack before slicing."
+    },
+    {
+      "name": "Bramble and apple crumble",
+      "serves": 6,
+      "ritual_note": "Wild blackberries were gathered in late summer. Use them if you can pick them safely, or buy them.",
+      "ingredients": [
+        "300 g blackberries",
+        "2 apples, peeled and cubed",
+        "2 tbsp sugar",
+        "100 g plain flour",
+        "50 g cold butter, cubed",
+        "40 g soft brown sugar",
+        "1 tsp cinnamon"
+      ],
+      "steps": [
+        "Heat the oven to 190 C (170 C fan).",
+        "Toss the blackberries and apples with the sugar in an ovenproof dish.",
+        "Rub the butter into the flour until it looks like breadcrumbs. Stir in the brown sugar and cinnamon.",
+        "Scatter the topping over the fruit and bake for 30 to 35 minutes, until bubbling and golden."
+      ],
+      "safety": "Let it cool for 10 minutes before serving. The fruit is very hot."
+    }
+  ]
+}

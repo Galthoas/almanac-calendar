@@ -4,7 +4,14 @@
 //
 // Usage: npm install && npm run build
 import { minify } from "terser";
-import { readFile, writeFile, mkdir, copyFile, rm } from "node:fs/promises";
+import {
+  readFile,
+  writeFile,
+  mkdir,
+  copyFile,
+  rm,
+  readdir,
+} from "node:fs/promises";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -45,7 +52,19 @@ await writeFile(join(out, "sw.js"), swMin.code);
 await copyFile(join(root, "manifest.json"), join(out, "manifest.json"));
 await copyFile(join(root, "icon.svg"), join(out, "icon.svg"));
 
-// 4. Public README (written for users, not for development)
+// 4. Menus: combine menus/*.json into one file in wheel order, for the app and for offline use.
+const menuDir = join(root, "menus");
+const menuFiles = (await readdir(menuDir)).filter((f) => f.endsWith(".json"));
+const menus = [];
+for (const f of menuFiles) {
+  menus.push(JSON.parse(await readFile(join(menuDir, f), "utf8")));
+}
+menus.sort((a, b) => a.order - b.order);
+const menuJson = JSON.stringify({ festivals: menus }, null, 2);
+await writeFile(join(root, "menus.json"), menuJson + "\n");
+await writeFile(join(out, "menus.json"), menuJson);
+
+// 5. Public README (written for users, not for development)
 await copyFile(join(root, "build", "public-README.md"), join(out, "README.md"));
 
 console.log("Built public copy in", out);

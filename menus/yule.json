@@ -1,0 +1,71 @@
+{
+  "id": "yule",
+  "name": "Yule",
+  "order": 8,
+  "date_note": "Around December 21 (the winter solstice), often extended through the twelve days of Christmas.",
+  "history": "Yule is linked to Germanic and Norse midwinter festivals. Historic practices include burning a Yule log, and wassailing, which meant drinking a spiced hot drink and blessing the orchards. Wassail was a mulled drink of ale or cider with roasted apples and spices. Many Yule foods are shared with later Christmas customs.",
+  "confidence": "The Yule log and wassail are documented in later sources. Their earliest pagan roots are debated.",
+  "sources": [
+    {
+      "title": "Why Christmas: the history of the Yule log",
+      "url": "https://www.whychristmas.com/customs/yulelog"
+    },
+    {
+      "title": "Sandra Wagner-Wright: Yule customs and wassail",
+      "url": "https://www.sandrawagnerwright.com/?p=12728"
+    },
+    {
+      "title": "Sacred Earth Journeys: traditions and symbols of Yule",
+      "url": "https://sacredearthjourneys.ca/blog/traditions-and-symbols-of-yule"
+    }
+  ],
+  "dishes": [
+    {
+      "name": "Wassail (spiced hot cider)",
+      "serves": 8,
+      "ritual_note": "Wassail was shared around the fire. Pour a cup for each person and offer a wish for the new year.",
+      "ingredients": [
+        "1.5 litres apple cider",
+        "2 apples, cored and halved",
+        "1 cinnamon stick",
+        "6 cloves",
+        "1/2 tsp ground ginger",
+        "1/4 tsp ground nutmeg",
+        "2 tbsp brown sugar",
+        "Optional: 500 ml ale, added at the end"
+      ],
+      "steps": [
+        "Heat the oven to 180 C. Roast the apple halves cut-side up for 20 minutes, until soft.",
+        "Put the cider, cinnamon, cloves, ginger, nutmeg and sugar in a pan. Simmer gently for 15 minutes. Do not boil.",
+        "Add the roasted apples to the pan and keep warm on low heat.",
+        "If using ale, stir it in just before serving so it stays lively."
+      ],
+      "safety": "Leave out the ale for a non-alcoholic version. Serve warm, not boiling."
+    },
+    {
+      "name": "Gingerbread loaf",
+      "serves": 10,
+      "ritual_note": "Spiced cakes and loaves were common midwinter foods. Cut a slice for each guest.",
+      "ingredients": [
+        "225 g plain flour",
+        "1 tsp ground ginger",
+        "1 tsp ground cinnamon",
+        "1/2 tsp ground nutmeg",
+        "1 tsp bicarbonate of soda",
+        "115 g butter, softened",
+        "100 g soft brown sugar",
+        "100 g black treacle or molasses",
+        "1 egg",
+        "150 ml warm milk"
+      ],
+      "steps": [
+        "Heat the oven to 170 C (150 C fan). Grease and line a 900 g loaf tin.",
+        "Sift the flour, spices and bicarbonate of soda into a bowl.",
+        "Beat the butter and sugar until fluffy. Beat in the treacle and the egg.",
+        "Fold in the dry ingredients, then the warm milk, until just combined.",
+        "Pour into the tin and bake for 45 to 50 minutes, until a skewer comes out clean. Cool in the tin for 10 minutes, then on a rack."
+      ],
+      "safety": "Keeps for up to 5 days wrapped in foil."
+    }
+  ]
+}
