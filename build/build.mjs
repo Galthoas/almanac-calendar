@@ -85,7 +85,8 @@ await writeFile(join(root, "garden.json"), gardenJson + "\n");
 await writeFile(join(out, "garden.json"), gardenJson);
 
 // 4c. data.js: menus and garden data as a plain script, so the app also works when opened from a file.
-const dataJs = `window.ALMANAC_DATA = {"menus": ${menuJson}, "garden": ${gardenJson}};\n`;
+const heathenJson = await readFile(join(root, "data", "heathen.json"), "utf8");
+const dataJs = `window.ALMANAC_DATA = {"menus": ${menuJson}, "garden": ${gardenJson}, "heathen": ${heathenJson.trim()}};\n`;
 await writeFile(join(root, "data.js"), dataJs);
 await writeFile(join(out, "data.js"), dataJs);
 

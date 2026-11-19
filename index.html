@@ -416,6 +416,19 @@
 
         <div
           class="panel"
+          id="heathenPanel"
+          style="margin-top: 20px; display: none"
+        >
+          <h2>Heathen table</h2>
+          <p class="small" id="heathenIntro"></p>
+          <div class="menu-h">Words of wisdom</div>
+          <div id="heathenWisdom"></div>
+          <div class="menu-h">Recipes</div>
+          <div id="heathenRecipes"></div>
+        </div>
+
+        <div
+          class="panel"
           id="gardenPanel"
           style="margin-top: 20px; display: none"
         >
@@ -1285,6 +1298,42 @@
           menuData = (window.ALMANAC_DATA && window.ALMANAC_DATA.menus) || null;
           renderMenus();
         }
+        // ---------- Heathen table (Heathenry look; data from heathen.json) ----------
+        function renderHeathen() {
+          const panel = $("heathenPanel");
+          const data = window.ALMANAC_DATA && window.ALMANAC_DATA.heathen;
+          if (currentStyle() !== "heathen" || !data) {
+            panel.style.display = "none";
+            return;
+          }
+          panel.style.display = "block";
+          $("heathenIntro").textContent = data.note;
+          $("heathenWisdom").innerHTML = data.wisdom
+            .map(
+              (w) => `
+              <details class="herb">
+                <summary>${esc(w.speaker)} <span class="small">(${esc(w.era)})</span></summary>
+                <p>${esc(w.text)}</p>
+                <p class="small"><a href="${esc(w.source.url)}" target="_blank" rel="noopener">${esc(w.source.title)}</a></p>
+              </details>`,
+            )
+            .join("");
+          $("heathenRecipes").innerHTML = data.recipes
+            .map(
+              (r) => `
+              <details class="herb">
+                <summary>${esc(r.name)} <span class="small">(serves ${esc(r.serves)})</span></summary>
+                <p class="small">${esc(r.history)}</p>
+                <div class="menu-h">Ingredients</div>
+                <ul>${r.ingredients.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>
+                <div class="menu-h">Method</div>
+                <ol>${r.steps.map((st) => `<li>${esc(st)}</li>`).join("")}</ol>
+                <p class="small"><strong>Note:</strong> ${esc(r.safety)}</p>
+              </details>`,
+            )
+            .join("");
+        }
+
         function renderMenus() {
           const panel = $("menuPanel");
           if (currentStyle() !== "kitchen" || !menuData) {
@@ -1344,6 +1393,7 @@
         function renderAll() {
           renderHerbs();
           renderMenus();
+          renderHeathen();
           renderGarden();
           renderCalendar();
           renderToday();
