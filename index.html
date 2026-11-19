@@ -1147,7 +1147,8 @@
           $("gardenBody").innerHTML = `
             <div class="menu-body">
               <p><strong>${esc(pack.name)}</strong></p>
-              <p class="small">${esc(pack.zone_note)}</p>
+              ${state.region && state.region.postal ? (state.region.zone ? `<p>USDA zone for your ZIP: <strong>${esc(state.region.zone)}</strong>.</p>` : `<p class="small">No USDA zone is mapped for your ZIP yet.</p>`) : ""}
+              <p class="small"><strong>About this pack’s area:</strong> ${esc(pack.zone_note)}</p>
               <div class="menu-h">Frost dates for ${year}</div>
               <p>Last spring frost about <strong>${MONTH_DAY(last)}</strong>. First fall frost about <strong>${MONTH_DAY(first)}</strong>. Growing season about ${season} days.</p>
               <p class="small">Base: ${esc(pack.frost.base_source)}. Shifted ${esc(pack.frost.elevation_shift_days)} days for elevation.</p>
@@ -1213,7 +1214,6 @@
           const alternatives = ranked.slice(1, 3).filter((a) => a.km <= 300);
           if (!state.gardenManual) {
             state.garden = nearest.pack.id;
-            state.gardenAuto = true;
             $("garden").value = nearest.pack.id;
           }
           const inRange = nearest.km <= (nearest.pack.coverage_km || 150);
