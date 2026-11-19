@@ -20,13 +20,44 @@
         --sabbat: #7fb069;
         --full: #f2d16b;
         --line: #3d352b;
+        --font: Georgia, "Times New Roman", serif;
+        --input: #171410;
+        --day: #221e19;
+        --on-accent: #1d1a16;
+        --radius: 8px;
+      }
+
+      /* Kitchen witch: warm hearth tones, cream paper, terracotta and sage */
+      :root[data-style="kitchen"] {
+        --bg: #f5ecdc;
+        --panel: #fffaf0;
+        --ink: #3b2a1e;
+        --muted: #7a6553;
+        --accent: #b4532a;
+        --sabbat: #5f7a4a;
+        --full: #d9a441;
+        --line: #e4d3b8;
+        --font: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+        --input: #fffdf7;
+        --day: #fbf4e6;
+        --on-accent: #fffaf0;
+        --radius: 14px;
+      }
+      :root[data-style="kitchen"] h1 {
+        font-style: italic;
+      }
+      :root[data-style="kitchen"] h1::before {
+        content: "🥄 ";
+      }
+      :root[data-style="kitchen"] .panel {
+        box-shadow: 0 2px 6px rgba(90, 60, 30, 0.12);
       }
       * {
         box-sizing: border-box;
       }
       body {
         margin: 0;
-        font-family: Georgia, "Times New Roman", serif;
+        font-family: var(--font);
         background: var(--bg);
         color: var(--ink);
       }
@@ -58,7 +89,7 @@
       .panel {
         background: var(--panel);
         border: 1px solid var(--line);
-        border-radius: 8px;
+        border-radius: var(--radius);
         padding: 14px;
       }
       .panel h2 {
@@ -79,13 +110,13 @@
         padding: 7px 9px;
         border-radius: 5px;
         border: 1px solid var(--line);
-        background: #171410;
+        background: var(--input);
         color: var(--ink);
         font: inherit;
       }
       button {
         background: var(--accent);
-        color: #1d1a16;
+        color: var(--on-accent);
         border: none;
         cursor: pointer;
         margin-top: 10px;
@@ -127,7 +158,7 @@
       }
       .day {
         min-height: 74px;
-        background: #221e19;
+        background: var(--day);
         border: 1px solid var(--line);
         border-radius: 5px;
         padding: 4px;
@@ -224,6 +255,8 @@
           <label for="tradition">Festival tradition</label>
           <select id="tradition"></select>
           <div class="small" id="traditionNote" style="margin-top: 4px"></div>
+          <label for="style">Look</label>
+          <select id="style"></select>
           <button id="saveRegion">Save region &amp; update data</button>
           <button id="updateWeather" class="secondary">
             Refresh weather only
@@ -529,6 +562,12 @@
             .join("");
           sel.value = currentTradition();
           showTraditionNote();
+          const styleSel = $("style");
+          styleSel.innerHTML = Object.keys(STYLES)
+            .map((k) => `<option value="${k}">${STYLES[k]}</option>`)
+            .join("");
+          styleSel.value = currentStyle();
+          applyStyle();
         }
         function showTraditionNote() {
           const names = TRADITIONS[currentTradition()].festivals
@@ -544,6 +583,24 @@
           showTraditionNote();
           touchSettings();
           renderAll();
+        });
+
+        // ---------- Looks ----------
+        // "dark" is the default. Each other look is a theme block in the CSS, keyed by data-style.
+        const STYLES = {
+          dark: "Dark (default)",
+          kitchen: "Kitchen witch",
+        };
+        function currentStyle() {
+          return STYLES[state.style] ? state.style : "dark";
+        }
+        function applyStyle() {
+          document.documentElement.dataset.style = currentStyle();
+        }
+        $("style").addEventListener("change", (e) => {
+          state.style = e.target.value;
+          applyStyle();
+          touchSettings();
         });
 
         // ---------- Rendering ----------
@@ -819,6 +876,7 @@
                   {
                     region: state.region || null,
                     tradition: state.tradition || null,
+                    style: state.style || null,
                     updated: state.settingsUpdated || 0,
                   },
                   null,
@@ -848,6 +906,7 @@
           if ((remote.updated || 0) > (state.settingsUpdated || 0)) {
             state.region = remote.region || state.region;
             state.tradition = remote.tradition || state.tradition;
+            state.style = remote.style || state.style;
             state.settingsUpdated = remote.updated;
             save(state);
             fillForm();
