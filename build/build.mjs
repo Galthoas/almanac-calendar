@@ -88,6 +88,18 @@ const dataJs = `window.ALMANAC_DATA = {"menus": ${menuJson}, "garden": ${gardenJ
 await writeFile(join(root, "data.js"), dataJs);
 await writeFile(join(out, "data.js"), dataJs);
 
+// 4d. Inline the data into the published index.html, so one file is enough to run the app.
+{
+  const page = await readFile(join(out, "index.html"), "utf8");
+  const tag = '<script src="data.js"></script>';
+  if (!page.includes(tag))
+    throw new Error("data.js script tag not found in index.html");
+  await writeFile(
+    join(out, "index.html"),
+    page.replace(tag, () => "<script>" + dataJs + "</script>"),
+  );
+}
+
 // 5. Public README (written for users, not for development)
 await copyFile(join(root, "build", "public-README.md"), join(out, "README.md"));
 

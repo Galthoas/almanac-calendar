@@ -1095,16 +1095,15 @@
         async function loadGarden() {
           gardenData =
             (window.ALMANAC_DATA && window.ALMANAC_DATA.garden) || null;
-          if (gardenData) {
-            $("garden").innerHTML =
-              `<option value="">None</option>` +
-              gardenData.packs
-                .map(
-                  (p) => `<option value="${esc(p.id)}">${esc(p.name)}</option>`,
-                )
-                .join("");
-            $("garden").value = state.garden || "";
-          }
+          const packs = gardenData ? gardenData.packs : [];
+          $("garden").innerHTML =
+            `<option value="">None</option>` +
+            packs
+              .map(
+                (p) => `<option value="${esc(p.id)}">${esc(p.name)}</option>`,
+              )
+              .join("");
+          $("garden").value = state.garden || "";
           renderGarden();
         }
         $("garden").addEventListener("change", (e) => {
