@@ -19,3 +19,12 @@
 - Extend Tracy City wild edibles to 6 to 8, and check them with University of Tennessee Extension.
 - Weekly recipe refresh from source sites.
 - Sync the garden pack choice across devices, if wanted.
+
+## Tomorrow (fix list, from 2026-11-18)
+- Find the correct Johnny's Seeds planting calculator URL (the guessed URL failed), read the full table past "Cerinthe", and record offsets in PLANTING_REFERENCE.md. Do not use the broccoli/tomato numbers from the earlier reply until they are verified.
+- Re-check the UAF direct-sow date: May 12 (search snippet) vs June 1 (full page).
+- NOAA frost normals: allow ncei.noaa.gov or attach station CSVs; then build the ZIP-to-station frost table.
+- Alaska zones: allow prism.oregonstate.edu, or attach the PRISM AK ZIP CSV or a USDA AK map with its legend. Fairbanks is still "not mapped".
+- Verify the Hávamál and Tacitus links in heathen.json against full texts.
+- Check Tracy City wild-edible and planting windows with University of Tennessee Extension.
+- Decide whether PLANTING_REFERENCE.md goes to the public build (currently private only).
