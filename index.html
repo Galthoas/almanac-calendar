@@ -49,6 +49,24 @@
       :root[data-style="kitchen"] h1::before {
         content: "🥄 ";
       }
+      .herb {
+        border-bottom: 1px solid var(--line);
+        padding: 6px 0;
+      }
+      .herb summary {
+        cursor: pointer;
+        font-weight: bold;
+        color: var(--ink);
+      }
+      .herb p {
+        margin: 6px 0;
+        font-size: 0.85rem;
+        line-height: 1.45;
+      }
+      .herb .tag {
+        display: inline;
+        margin-left: 6px;
+      }
       :root[data-style="kitchen"] .panel {
         box-shadow: 0 2px 6px rgba(60, 46, 26, 0.14);
       }
@@ -295,6 +313,20 @@
         <div class="panel" style="margin-top: 20px">
           <h2>Upcoming</h2>
           <ul class="list" id="upcoming"></ul>
+        </div>
+
+        <div
+          class="panel"
+          id="herbsPanel"
+          style="margin-top: 20px; display: none"
+        >
+          <h2>Kitchen witch herbs</h2>
+          <p class="small">
+            Folklore and traditional uses only, not medical advice. Check with a
+            doctor or pharmacist before using herbs medicinally, especially in
+            pregnancy.
+          </p>
+          <div id="herbList"></div>
         </div>
 
         <div class="panel" style="margin-top: 20px">
@@ -601,6 +633,7 @@
           state.style = e.target.value;
           applyStyle();
           touchSettings();
+          renderAll();
         });
 
         // ---------- Rendering ----------
@@ -771,7 +804,172 @@
             `<li><span>Nothing in the next 4 months.</span></li>`;
         }
 
+        // ---------- Kitchen witch herbs (shown only in the kitchen look) ----------
+        const SEASON_NAMES = {
+          winter: "Winter",
+          spring: "Spring",
+          summer: "Summer",
+          autumn: "Autumn",
+        };
+        const HERBS = [
+          {
+            name: "Rosemary",
+            seasons: ["winter", "autumn"],
+            festivals: ["Yule", "Samhain"],
+            culinary:
+              "Roast potatoes, lamb, and focaccia. Pairs well with lemon and garlic.",
+            lore: "Remembrance and protection. Long linked to memory and to guarding the home.",
+            spell:
+              "Write a name or a memory on a slip of paper, wrap it around a rosemary sprig, and keep it by a door or in a drawer for protection.",
+            care: "Avoid concentrated rosemary oil in food. Large medicinal amounts aren't advised in pregnancy.",
+          },
+          {
+            name: "Sage",
+            seasons: ["autumn"],
+            festivals: ["Samhain", "Mabon"],
+            culinary: "Stuffing, brown-butter sauce, and sausages.",
+            lore: "Cleansing and wisdom. Burned to clear a room.",
+            spell:
+              "Bundle dried sage, light it, and carry the smoke through each room while you state what you want to clear away. Open a window afterward.",
+            care: "Large amounts of sage aren't advised in pregnancy. Culinary use is fine.",
+          },
+          {
+            name: "Thyme",
+            seasons: ["summer"],
+            festivals: ["Litha"],
+            culinary: "Roasted vegetables, soups, and eggs.",
+            lore: "Courage and healing. Linked to purification and to bravery before a challenge.",
+            spell:
+              "Steep fresh thyme in warm honey for a few days, then strain. Take a spoonful before a hard task to call up courage.",
+            care: "Culinary amounts are fine. Medicinal teas and oils need professional advice.",
+          },
+          {
+            name: "Basil",
+            seasons: ["summer"],
+            festivals: ["Beltane", "Litha"],
+            culinary: "Pesto, tomato dishes, and fresh salads.",
+            lore: "Love and prosperity. Often grown on sunny windowsills to draw good fortune.",
+            spell:
+              "Grow a pot on a sunny sill. Each time you water it, name one thing you want to grow in your life.",
+            care: "No special cautions for culinary use.",
+          },
+          {
+            name: "Bay laurel",
+            seasons: ["winter"],
+            festivals: ["Yule"],
+            culinary:
+              "Stews, braises, and soups. Remove whole leaves before serving, since they're sharp and can lodge in the throat.",
+            lore: "Success, protection, and fulfilled wishes.",
+            spell:
+              "Write a wish on a bay leaf and burn it safely in a fireproof dish. Or keep a leaf in your wallet for good fortune.",
+            care: "Remove whole leaves from food before eating.",
+          },
+          {
+            name: "Garlic",
+            seasons: ["autumn"],
+            festivals: ["Samhain", "Mabon"],
+            culinary: "Nearly everything.",
+            lore: "Protection against ill will. Hung in kitchens and over doorways.",
+            spell:
+              "Braid a garlic rope at Samhain and hang it over the door to protect the household through winter.",
+            care: "Culinary use is fine. Garlic supplements can affect blood thinning, so ask a doctor first.",
+          },
+          {
+            name: "Cinnamon",
+            seasons: ["winter"],
+            festivals: ["Yule"],
+            culinary: "Baking, mulled cider, and warm drinks.",
+            lore: "Prosperity, warmth, and love. A winter spice tied to the home hearth.",
+            spell:
+              "Stir cinnamon into a warm drink while you focus on one goal for the coming year.",
+            care: "Cassia cinnamon (the common kind) contains coumarin. Use it in moderation.",
+          },
+          {
+            name: "Mint",
+            seasons: ["summer"],
+            festivals: ["Litha"],
+            culinary: "Tea, lamb sauce, and fruit salads.",
+            lore: "Money and hospitality. Set out to welcome guests and attract abundance.",
+            spell:
+              "Place a fresh sprig in your cash box or by the front door to welcome abundance.",
+            care: "Peppermint oil isn't meant for eating. Mint can worsen heartburn for some people.",
+          },
+          {
+            name: "Parsley",
+            seasons: ["spring"],
+            festivals: ["Ostara"],
+            culinary: "Sauces, salads, and tabbouleh.",
+            lore: "Protection and renewal. Older folklore warns against giving parsley away.",
+            spell:
+              "Plant parsley at Ostara and tend it through the season as a renewal charm.",
+            care: "Culinary amounts are fine. Large medicinal doses aren't advised in pregnancy.",
+          },
+          {
+            name: "Dill",
+            seasons: ["summer"],
+            festivals: ["Litha"],
+            culinary: "Pickles, fish, and potato salad.",
+            lore: "Protection and money. Hung or scattered to guard a threshold.",
+            spell:
+              "Scatter dill across the threshold on Litha to guard the home through the coming months.",
+            care: "No special cautions for culinary use.",
+          },
+          {
+            name: "Oregano",
+            seasons: ["summer"],
+            festivals: ["Lughnasadh"],
+            culinary: "Tomato sauces, pizza, and roasted vegetables.",
+            lore: "Joy and peace. Hung to dry at the harvest.",
+            spell:
+              "Hang a bundle to dry at Lughnasadh, and keep it as a charm for contentment through the year.",
+            care: "No special cautions for culinary use.",
+          },
+          {
+            name: "Ginger",
+            seasons: ["spring"],
+            festivals: ["Ostara", "Imbolc"],
+            culinary: "Stir-fries, teas, and baking.",
+            lore: "Energy and success. Used to warm up new ventures.",
+            spell:
+              "Grate fresh ginger into tea before starting a new project, and focus on the energy you want to bring to it.",
+            care: "Culinary amounts are fine. Ask a doctor before using large medicinal amounts, especially with blood thinners.",
+          },
+        ];
+        function currentSeason(date) {
+          const m = date.getMonth();
+          if (m === 11 || m <= 1) return "winter";
+          if (m <= 4) return "spring";
+          if (m <= 7) return "summer";
+          return "autumn";
+        }
+        function renderHerbs() {
+          const panel = $("herbsPanel");
+          if (currentStyle() !== "kitchen") {
+            panel.style.display = "none";
+            return;
+          }
+          panel.style.display = "block";
+          const season = currentSeason(new Date());
+          const sorted = [...HERBS].sort(
+            (a, b) => b.seasons.includes(season) - a.seasons.includes(season),
+          );
+          $("herbList").innerHTML = sorted
+            .map((h) => {
+              const now = h.seasons.includes(season);
+              return `<details class="herb">
+          <summary>${h.name}${now ? ' <span class="tag">in season now</span>' : ""}</summary>
+          <p class="small"><strong>Festivals:</strong> ${h.festivals.join(", ")}<br><strong>Seasons:</strong> ${h.seasons.map((s) => SEASON_NAMES[s]).join(", ")}</p>
+          <p><strong>Kitchen:</strong> ${h.culinary}</p>
+          <p><strong>Lore:</strong> ${h.lore}</p>
+          <p><strong>Spell:</strong> ${h.spell}</p>
+          <p class="small">${h.care}</p>
+        </details>`;
+            })
+            .join("");
+        }
+
         function renderAll() {
+          renderHerbs();
           renderCalendar();
           renderToday();
           renderUpcoming();
