@@ -7,7 +7,7 @@ const SHELL = [
   "./index.html",
   "./manifest.json",
   "./icon.svg",
-  "./menus.json",
+  "./data.js",
 ];
 
 self.addEventListener("install", (event) => {

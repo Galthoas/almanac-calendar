@@ -419,6 +419,7 @@
       </section>
     </main>
 
+    <script src="data.js"></script>
     <script>
       (() => {
         "use strict";
@@ -1092,10 +1093,8 @@
             </div>`;
         }
         async function loadGarden() {
-          try {
-            const res = await fetch("garden.json");
-            if (res.ok) gardenData = await res.json();
-          } catch {}
+          gardenData =
+            (window.ALMANAC_DATA && window.ALMANAC_DATA.garden) || null;
           if (gardenData) {
             $("garden").innerHTML =
               `<option value="">None</option>` +
@@ -1146,10 +1145,7 @@
           return best ? best.name.toLowerCase() : "imbolc";
         }
         async function loadMenus() {
-          try {
-            const res = await fetch("menus.json");
-            if (res.ok) menuData = await res.json();
-          } catch {}
+          menuData = (window.ALMANAC_DATA && window.ALMANAC_DATA.menus) || null;
           renderMenus();
         }
         function renderMenus() {
